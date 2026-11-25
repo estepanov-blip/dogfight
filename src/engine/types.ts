@@ -35,6 +35,22 @@ export interface Balance {
   symbols: Record<SymbolId, SymbolDef>;
   triples: Record<SymbolId, Partial<EffectValues>>;
   rules: RulesConfig;
+  /**
+   * Simulator-only experiment knobs (FC-04). Never read from balance.json:
+   * production battles always run with these absent (= v0.2 behaviour).
+   */
+  experiment?: CombatExperiment;
+}
+
+export interface CombatExperiment {
+  /** Shield the non-starting fighter begins the battle with (Q02). Default 0. */
+  secondStartShield?: number;
+  /**
+   * Q04 "hold" rule: own shield no longer expires at the start of own turn; it lasts
+   * until an opponent hit with positive damage. A new shield replaces the old one,
+   * a spin without shield keeps it. Default false (v0.2: expires every own turn).
+   */
+  shieldHold?: boolean;
 }
 
 export interface ComboResult {
@@ -53,7 +69,7 @@ export interface FighterState {
 }
 
 export type BattleStatus = 'playing' | 'over';
-export type EndReason = 'ko' | 'doubleKo' | 'spinLimit' | 'forfeit';
+export type EndReason = 'ko' | 'doubleKo' | 'spinLimit' | 'forfeit' | 'timeout';
 export type Outcome = PlayerIndex | 'draw';
 
 /** Everything that happened during one spin. Used by UI, log and analytics. */

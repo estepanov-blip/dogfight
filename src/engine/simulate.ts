@@ -29,7 +29,12 @@ export interface SimulationReport {
   draws: number;
   winRate: [number, number];
   drawRate: number;
+  /** Share of decisive fights (no draws) won by the fighter who spun first. */
   starterWinRate: number;
+  starterWins: number;
+  decisive: number;
+  /** Fights whose final spin was spin #maxSpins (any end reason). */
+  fightsAtMaxSpins: number;
   endReasons: Record<EndReason, number>;
   spinsPerFight: Distribution;
   /** Turns (spins) by a single fighter, averaged. */
@@ -90,7 +95,7 @@ export function simulate(balance: Balance, opts: SimulationOptions): SimulationR
   const wins: [number, number] = [0, 0];
   let draws = 0;
   let starterWins = 0;
-  const endReasons: Record<EndReason, number> = { ko: 0, doubleKo: 0, spinLimit: 0, forfeit: 0 };
+  const endReasons: Record<EndReason, number> = { ko: 0, doubleKo: 0, spinLimit: 0, forfeit: 0, timeout: 0 };
   const lengths: number[] = [];
   const symCount = Object.fromEntries(SYMBOL_IDS.map((s) => [s, 0])) as Record<SymbolId, number>;
   const tripleCount = Object.fromEntries(SYMBOL_IDS.map((s) => [s, 0])) as Record<SymbolId, number>;
@@ -163,6 +168,9 @@ export function simulate(balance: Balance, opts: SimulationOptions): SimulationR
     winRate: [wins[0] / fights, wins[1] / fights],
     drawRate: draws / fights,
     starterWinRate: starterWins / decisiveN,
+    starterWins,
+    decisive,
+    fightsAtMaxSpins: lengths.filter((l) => l === balance.rules.maxSpins).length,
     endReasons,
     spinsPerFight: distribution(lengths, balance.rules.maxSpins),
     meanSpinsPerFighter: totalSpins / fights / 2,

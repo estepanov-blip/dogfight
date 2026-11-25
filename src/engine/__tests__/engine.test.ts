@@ -397,3 +397,45 @@ describe('simulation', () => {
     expect(simulate(B, { fights: 500, seed: 9 }).wins).toEqual(simulate(B, { fights: 500, seed: 9 }).wins);
   });
 });
+
+describe('FC-04 simulator-only experiment knobs (production default = v0.2)', () => {
+  const hold: Balance = { ...B, experiment: { shieldHold: true } };
+  it('balance.json never enables experiments', () => {
+    expect(B.experiment).toBeUndefined();
+    expect(parseBalance({ ...raw, experiment: { shieldHold: true } }).experiment).toBeUndefined();
+  });
+  it('start shield goes to the non-starter only', () => {
+    const b: Balance = { ...B, experiment: { secondStartShield: 15 } };
+    expect(createBattle(b, { seed: 1, starter: 0 }).fighters.map((f) => f.shield)).toEqual([0, 15]);
+    expect(createBattle(b, { seed: 1, starter: 1 }).fighters.map((f) => f.shield)).toEqual([15, 0]);
+  });
+  it('v0.2: own shield burns before own extra turn', () => {
+    const r = turn(fresh(), ['block', 'extra', 'miss']);
+    expect(r.state.current).toBe(0);
+    const r2 = turn(r.state, ['miss', 'miss', 'heal']);
+    expect(r2.record.shieldExpired).toBe(10);
+    expect(r2.state.fighters[0].shield).toBe(0);
+  });
+  it('hold: shield survives own extra turn and a zero-damage enemy spin', () => {
+    let s = turn(fresh(), ['block', 'extra', 'miss'], hold).state;
+    s = turn(s, ['miss', 'miss', 'heal'], hold).state; // own extra turn, no new shield
+    expect(s.fighters[0].shield).toBe(10);
+    s = turn(s, ['heal', 'miss', 'miss'], hold).state; // enemy deals 0
+    expect(s.fighters[0].shield).toBe(10);
+    s = turn(s, ['miss', 'heal', 'miss'], hold).state; // own spin without shield keeps it
+    expect(s.fighters[0].shield).toBe(10);
+    const r = turn(s, ['critical', 'miss', 'miss'], hold); // positive hit consumes it whole
+    expect(r.record.absorbed).toBe(10);
+    expect(r.state.fighters[0].shield).toBe(0);
+  });
+  it('hold: a new shield replaces (never stacks); self-damage ignores it', () => {
+    let s = turn(fresh(), ['block', 'block', 'extra'], hold).state; // 20 + extra turn
+    expect(s.fighters[0].shield).toBe(20);
+    s = turn(s, ['block', 'miss', 'miss'], hold).state; // replaced by 10, not 30
+    expect(s.fighters[0].shield).toBe(10);
+    s = turn(s, ['heal', 'heal', 'heal'], hold).state; // P1
+    const r = turn(s, ['miss', 'miss', 'miss'], hold); // P0 self-damage 30
+    expect(r.state.fighters[0].hp).toBe(70);
+    expect(r.state.fighters[0].shield).toBe(10);
+  });
+});

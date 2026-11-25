@@ -14,11 +14,14 @@ export function other(p: PlayerIndex): PlayerIndex {
 export function createBattle(balance: Balance, opts: CreateBattleOptions): BattleState {
   const seed = normalizeSeed(opts.seed);
   const starter = opts.starter ?? 0;
+  const startShield = Math.max(0, balance.experiment?.secondStartShield ?? 0);
+  const fighters: BattleState['fighters'] = [
+    { hp: balance.hp, shield: 0 },
+    { hp: balance.hp, shield: 0 },
+  ];
+  fighters[other(starter)].shield = startShield;
   return {
-    fighters: [
-      { hp: balance.hp, shield: 0 },
-      { hp: balance.hp, shield: 0 },
-    ],
+    fighters,
     current: starter,
     starter,
     spinCount: 0,
@@ -85,9 +88,10 @@ export function takeTurn(
   const them = fighters[opp];
   const hpBefore: [number, number] = [fighters[0].hp, fighters[1].hp];
 
-  // 1. own shield expires before own turn
-  const shieldExpired = me.shield;
-  me.shield = 0;
+  // 1. own shield expires before own turn (v0.2). Experiment "hold": it stays until hit.
+  const hold = !!balance.experiment?.shieldHold;
+  const shieldExpired = hold ? 0 : me.shield;
+  if (!hold) me.shield = 0;
 
   // 2. effects
   const combo = resolveCombo(symbols, balance);
@@ -112,8 +116,8 @@ export function takeTurn(
   const selfDamage = Math.min(fx.selfDamage, me.hp);
   me.hp = Math.max(0, me.hp - fx.selfDamage);
 
-  // 5. new shield
-  me.shield = fx.shield;
+  // 5. new shield (hold: a new shield replaces the old one, no shield keeps it; never stacks)
+  if (!hold || fx.shield > 0) me.shield = fx.shield;
 
   const spinCount = state.spinCount + 1;
 
@@ -209,6 +213,12 @@ export function takeTurn(
 /** Rematch: fresh battle, new seed, the other fighter opens. */
 export function createRematch(prev: BattleState, balance: Balance, seed: number): BattleState {
   return createBattle(balance, { seed, starter: other(prev.starter) });
+}
+
+/** The fighter whose turn expired loses (online duels, turn timeout). Pure. */
+export function timeoutLoss(state: BattleState, loser: PlayerIndex): BattleState {
+  if (state.status === 'over') throw new BattleOverError();
+  return { ...state, status: 'over', outcome: other(loser), endReason: 'timeout', pendingExtra: 0, currentIsExtra: false };
 }
 
 /** A fighter gives up (online duels). Pure. */
