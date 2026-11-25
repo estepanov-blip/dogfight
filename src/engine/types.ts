@@ -53,7 +53,7 @@ export interface FighterState {
 }
 
 export type BattleStatus = 'playing' | 'over';
-export type EndReason = 'ko' | 'doubleKo' | 'spinLimit';
+export type EndReason = 'ko' | 'doubleKo' | 'spinLimit' | 'forfeit';
 export type Outcome = PlayerIndex | 'draw';
 
 /** Everything that happened during one spin. Used by UI, log and analytics. */

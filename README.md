@@ -1,7 +1,9 @@
-# ПРОПУСТИЛ! / Dog Fight Club — Combat Sandbox v0.1
+# ПРОПУСТИЛ! / Dog Fight Club — v0.2 (дуэли с друзьями)
 
-Локальный прототип боевой системы: слот-баттлер «собака против собаки» на React + TypeScript + Vite.
-Без сервера, монетизации и Telegram — только бой, визуальная обратная связь и инструменты отладки.
+Слот-баттлер «собака против собаки»: React + TypeScript + Vite, Telegram Mini App.
+v0.1 — боевая песочница (бот, вдвоём на одном экране, debug, симуляция).
+v0.2 — **асинхронные дуэли с друзьями** через Telegram: сервер на Cloudflare Workers + Durable Objects,
+вызов в чат, ходы по очереди, уведомления бота, реванш, рейтинг чата. Запуск и устройство — **docs/DUELS.md**.
 
 ## Быстрый старт
 
@@ -12,6 +14,8 @@ npm test             # 51 тест: движок + UI (vitest, jsdom)
 npm run build        # typecheck (tsc -b) + production-сборка в dist/
 npm run preview      # раздать dist/
 npm run simulate -- 10000 1   # CLI-симуляция 10 000 боёв, seed 1
+npm run typecheck:server      # типы сервера дуэлей
+npx wrangler dev              # игра + сервер дуэлей локально (см. docs/DUELS.md)
 ```
 
 Требуется Node 20+ (проверено на Node 22).
@@ -42,6 +46,8 @@ src/engine/                ← чистая логика, без React/DOM
   session.ts               BattleSession: блокировка ввода, бот, реванш, debug-хуки
   stats.ts                 статистика боя для экрана результата
   simulate.ts              headless-симуляция N боёв с отчётом
+src/online/                ← протокол и API-клиент дуэлей
+server/                    ← Cloudflare Worker: API, проверка initData, Durable Object, бот
 src/ui/                    ← только представление
   presentation.ts          TurnRecord → надписи, позы, всплывающие числа (чистые функции)
   useBattle.ts             таймлайн анимаций хода, синхронизация с сессией

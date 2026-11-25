@@ -1,11 +1,20 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { GameMode } from './engine';
 import { parseSeed } from './engine';
+import { api, detectOnline } from './online/api';
+import { getStartDuelId, requestWriteAccess, shareChallenge } from './platform/telegram';
 import { BattleScreen } from './ui/screens/BattleScreen';
+import { DuelScreen } from './ui/screens/DuelScreen';
+import { DuelsScreen } from './ui/screens/DuelsScreen';
 import { LabScreen } from './ui/screens/LabScreen';
 import { MenuScreen } from './ui/screens/MenuScreen';
 
-type Screen = { name: 'menu' } | { name: 'battle'; mode: GameMode; id: number } | { name: 'lab' };
+type Screen =
+  | { name: 'menu' }
+  | { name: 'battle'; mode: GameMode; id: number }
+  | { name: 'lab' }
+  | { name: 'duel'; id: string }
+  | { name: 'duels' };
 
 function readDebugFlag(): boolean {
   try {
@@ -27,8 +36,14 @@ function readSeed(): number | undefined {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: 'menu' });
+  const startDuel = getStartDuelId();
+  const [screen, setScreen] = useState<Screen>(startDuel ? { name: 'duel', id: startDuel } : { name: 'menu' });
   const [debug, setDebugState] = useState(readDebugFlag);
+  const [online, setOnline] = useState(false);
+  const [myTurns, setMyTurns] = useState(0);
+  const [challengeBusy, setChallengeBusy] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
   const setDebug = (v: boolean) => {
     setDebugState(v);
     try {
@@ -37,6 +52,43 @@ export default function App() {
       /* storage unavailable */
     }
   };
+
+  useEffect(() => {
+    void detectOnline().then(setOnline);
+  }, []);
+
+  // "твой ход" badge on the menu
+  useEffect(() => {
+    if (!online || screen.name !== 'menu') return;
+    api
+      .me()
+      .then((r) => setMyTurns(r.duels.filter((d) => d.status === 'active' && d.yourTurn).length))
+      .catch(() => {});
+  }, [online, screen.name]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 3500);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+
+  const challenge = useCallback(async () => {
+    if (challengeBusy) return;
+    setChallengeBusy(true);
+    try {
+      await requestWriteAccess(); // so the bot can say "он принял вызов" / "твой ход"
+      const { duel, prepared } = await api.create();
+      await shareChallenge(prepared, duel.link, 'Вызываю тебя на бой! 🥊 Ударь в ответ, пока я не убежал.');
+      setScreen({ name: 'duel', id: duel.id });
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : 'Не удалось создать вызов');
+    } finally {
+      setChallengeBusy(false);
+    }
+  }, [challengeBusy]);
+
+  const toMenu = useCallback(() => setScreen({ name: 'menu' }), []);
+  const openDuel = useCallback((id: string) => setScreen({ name: 'duel', id }), []);
 
   return (
     <div className="app-shell">
@@ -47,18 +99,26 @@ export default function App() {
             setDebug={setDebug}
             onPlay={(mode) => setScreen({ name: 'battle', mode, id: Date.now() })}
             onLab={() => setScreen({ name: 'lab' })}
+            online={online}
+            myTurns={myTurns}
+            challengeBusy={challengeBusy}
+            onChallenge={challenge}
+            onDuels={() => setScreen({ name: 'duels' })}
           />
         )}
         {screen.name === 'battle' && (
-          <BattleScreen
-            key={screen.id}
-            mode={screen.mode}
-            seed={readSeed()}
-            debug={debug}
-            onExit={() => setScreen({ name: 'menu' })}
-          />
+          <BattleScreen key={screen.id} mode={screen.mode} seed={readSeed()} debug={debug} onExit={toMenu} />
         )}
-        {screen.name === 'lab' && <LabScreen onBack={() => setScreen({ name: 'menu' })} />}
+        {screen.name === 'lab' && <LabScreen onBack={toMenu} />}
+        {screen.name === 'duel' && <DuelScreen key={screen.id} id={screen.id} onExit={toMenu} onOpenDuel={openDuel} />}
+        {screen.name === 'duels' && (
+          <DuelsScreen onExit={toMenu} onOpenDuel={openDuel} onChallenge={challenge} challengeBusy={challengeBusy} />
+        )}
+        {toast && (
+          <div className="toast" role="alert">
+            {toast}
+          </div>
+        )}
       </div>
     </div>
   );

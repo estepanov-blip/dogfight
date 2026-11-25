@@ -1,36 +1,43 @@
 import { useEffect, useRef } from 'react';
-import { battleStats, type BattleState, type GameMode } from '../../engine';
+import { battleStats, type BattleState, type PlayerIndex } from '../../engine';
 import { FIGHTER_LOOK, outcomeTitle } from '../presentation';
 import { Crown } from './Crown';
 
 interface Props {
   state: BattleState;
-  mode: GameMode;
+  /** Whose point of view: 0/1, or null for neutral hot-seat. */
+  me: PlayerIndex | null;
   names: [string, string];
   onRematch: () => void;
+  rematchLabel?: string;
+  rematchBusy?: boolean;
   onMenu: () => void;
   onLog: () => void;
 }
 
-export function ResultOverlay({ state, mode, names, onRematch, onMenu, onLog }: Props) {
+export function ResultOverlay({ state, me, names, onRematch, rematchLabel, rematchBusy, onMenu, onLog }: Props) {
   const rematchRef = useRef<HTMLButtonElement>(null);
   useEffect(() => rematchRef.current?.focus(), []);
   if (state.outcome === null || state.endReason === null) return null;
-  const { title, kind } = outcomeTitle(state.outcome, state.endReason, mode);
+  const { title, kind } = outcomeTitle(state.outcome, state.endReason, me);
   const stats = battleStats(state.log);
   const winner = state.outcome === 'draw' ? null : state.outcome;
+  const opp = me === null ? null : names[me === 0 ? 1 : 0];
+  const how = state.endReason === 'ko' ? ' нокаутом' : state.endReason === 'forfeit' ? ' — соперник сдался' : ' по очкам';
   const subtitle =
     winner === null
       ? state.endReason === 'doubleKo'
         ? 'Оба на полу. Реванш?'
         : `${state.spinCount} ходов — и никто не дожал`
-      : mode === 'bot'
-        ? winner === 0
+      : me !== null
+        ? winner === me
           ? state.endReason === 'ko'
-            ? 'Саня отправлен в нокаут'
-            : 'Победа по очкам'
-          : 'Саня победил. Ударь в ответ!'
-        : `${names[winner]} побеждает${state.endReason === 'ko' ? ' нокаутом' : ' по очкам'}`;
+            ? `${opp} отправлен в нокаут`
+            : `Победа${how}`
+          : state.endReason === 'forfeit'
+            ? 'Ты сдался. Реванш?'
+            : `${opp} победил. Ударь в ответ!`
+        : `${names[winner]} побеждает${how}`;
 
   const rows: [string, (i: 0 | 1) => string | number][] = [
     ['Урон', (i) => stats[i].damageDealt],
@@ -67,8 +74,8 @@ export function ResultOverlay({ state, mode, names, onRematch, onMenu, onLog }: 
           ))}
         </div>
         <div className="result-actions">
-          <button ref={rematchRef} className="btn btn-primary" onClick={onRematch}>
-            ⟳ Реванш
+          <button ref={rematchRef} className="btn btn-primary" onClick={onRematch} disabled={rematchBusy}>
+            ⟳ {rematchLabel ?? 'Реванш'}
           </button>
           <button className="btn btn-dark" onClick={onMenu}>
             В главное

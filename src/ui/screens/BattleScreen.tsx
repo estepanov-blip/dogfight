@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { BALANCE, type GameMode, type PlayerIndex } from '../../engine';
 import { BattleLog } from '../components/BattleLog';
 import { DebugDrawer } from '../components/DebugDrawer';
-import { Fighter } from '../components/Fighter';
+import { Arena } from '../components/Arena';
 import { Hud } from '../components/Hud';
 import { Reels } from '../components/Reels';
 import { ResultOverlay } from '../components/ResultOverlay';
-import { fighterNames, RING_IMG, SYMBOL_IMG } from '../presentation';
+import { fighterNames } from '../presentation';
 import { useBattle } from '../useBattle';
 import { bindBackButton } from '../../platform/telegram';
 
@@ -29,7 +29,7 @@ export function BattleScreen({ mode, seed, debug, onExit }: Props) {
   const [speed, setSpeed] = useState(() => (prefersReducedMotion() ? 2 : 1));
   const [botPaused, setBotPaused] = useState(false);
   const ctl = useBattle({ mode, seed, speed, botPaused });
-  const { state, session, view, reel, poses, caption, floats, impact, shakeKey, flashKey, showResult } = ctl;
+  const { state, session, view, reel, showResult } = ctl;
   const [logOpen, setLogOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(false);
   const names = fighterNames(mode);
@@ -41,24 +41,6 @@ export function BattleScreen({ mode, seed, debug, onExit }: Props) {
   const shownTurn: PlayerIndex = animating && ctl.lastRecord ? ctl.lastRecord.actor : state.current;
   const shownSpin = animating && ctl.lastRecord ? ctl.lastRecord.index : state.spinCount + 1;
   const extraNow = playing && state.currentIsExtra && session.phase === 'idle';
-
-  // screen shake via WAAPI so fighters are not remounted mid-animation
-  const arenaRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (shakeKey === 0 || !arenaRef.current?.animate) return;
-    const a = 7;
-    arenaRef.current.animate(
-      [
-        { transform: 'translate(0,0)' },
-        { transform: `translate(${-a}px,${a / 2}px) rotate(-0.6deg)` },
-        { transform: `translate(${a}px,${-a / 2}px) rotate(0.6deg)` },
-        { transform: `translate(${-a / 2}px,${a / 3}px)` },
-        { transform: `translate(${a / 3}px,0)` },
-        { transform: 'translate(0,0)' },
-      ],
-      { duration: 380 / Math.max(0.5, speed), easing: 'ease-out' },
-    );
-  }, [shakeKey, speed]);
 
   // Telegram native Back button = exit to menu
   useEffect(() => bindBackButton(onExit), [onExit]);
@@ -106,43 +88,7 @@ export function BattleScreen({ mode, seed, debug, onExit }: Props) {
         {extraNow && <span className="extra-badge">⚡ доп. ход</span>}
       </div>
 
-      <main className="arena" ref={arenaRef}>
-        <div className="arena-bg" style={{ backgroundImage: `url(${RING_IMG})` }} aria-hidden />
-        <div className="arena-lights" aria-hidden />
-        <div className="arena-floor" aria-hidden />
-        <Fighter
-          index={0}
-          pose={poses[0]}
-          shield={view.shield[0]}
-          active={(playing || animating) && turnSide === 0}
-          floats={floats.filter((f) => f.side === 0)}
-        />
-        <Fighter
-          index={1}
-          pose={poses[1]}
-          shield={view.shield[1]}
-          active={(playing || animating) && turnSide === 1}
-          floats={floats.filter((f) => f.side === 1)}
-        />
-        {impact && (
-          <div
-            key={impact.key}
-            className={`impact impact-${impact.side === 0 ? 'left' : 'right'} ${impact.crit ? 'crit' : ''}`}
-            aria-hidden
-          >
-            <img src={SYMBOL_IMG.critical} alt="" />
-          </div>
-        )}
-        {caption && !showResult && (
-          <div key={`${caption.key}-${caption.text}`} className={`caption caption-${caption.kind}`} role="status" aria-live="polite">
-            <div className="caption-text" data-text={caption.text}>
-              {caption.text}
-            </div>
-            {caption.sub && <div className="caption-sub">{caption.sub}</div>}
-          </div>
-        )}
-        {flashKey > 0 && <div key={`flash-${flashKey}`} className="crit-flash" aria-hidden />}
-      </main>
+      <Arena anim={ctl} speed={speed} turnSide={turnSide} active={playing || animating} hideCaption={showResult} />
 
       <section className="controls">
         <Reels reel={reel} speed={speed} />
@@ -183,7 +129,7 @@ export function BattleScreen({ mode, seed, debug, onExit }: Props) {
       {showResult && !logOpen && (
         <ResultOverlay
           state={state}
-          mode={mode}
+          me={mode === 'bot' ? 0 : null}
           names={names}
           onRematch={ctl.rematch}
           onMenu={onExit}

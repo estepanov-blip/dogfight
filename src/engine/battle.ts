@@ -210,3 +210,9 @@ export function takeTurn(
 export function createRematch(prev: BattleState, balance: Balance, seed: number): BattleState {
   return createBattle(balance, { seed, starter: other(prev.starter) });
 }
+
+/** A fighter gives up (online duels). Pure. */
+export function forfeit(state: BattleState, loser: PlayerIndex): BattleState {
+  if (state.status === 'over') throw new BattleOverError();
+  return { ...state, status: 'over', outcome: other(loser), endReason: 'forfeit', pendingExtra: 0, currentIsExtra: false };
+}

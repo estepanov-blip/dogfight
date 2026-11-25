@@ -162,16 +162,21 @@ export function describeTurn(r: TurnRecord, names: [string, string]): string {
   return parts.join(' · ');
 }
 
+/** Result title from the point of view of `me` (null = neutral, e.g. hot-seat). */
 export function outcomeTitle(
   outcome: PlayerIndex | 'draw',
   endReason: string,
-  mode: GameMode,
+  me: PlayerIndex | null,
 ): { title: string; kind: 'ko' | 'win' | 'lose' | 'draw' } {
   if (outcome === 'draw') return { title: endReason === 'doubleKo' ? 'ДВОЙНОЙ НОКАУТ!' : 'НИЧЬЯ!', kind: 'draw' };
+  if (endReason === 'forfeit') {
+    if (me === null) return { title: 'СДАЛСЯ!', kind: 'win' };
+    return outcome === me ? { title: 'ПОБЕДА!', kind: 'win' } : { title: 'ТЫ СДАЛСЯ', kind: 'lose' };
+  }
   if (endReason === 'spinLimit') {
-    if (mode === 'bot') return outcome === 0 ? { title: 'ПОБЕДА!', kind: 'win' } : { title: 'ПОРАЖЕНИЕ', kind: 'lose' };
+    if (me !== null) return outcome === me ? { title: 'ПОБЕДА!', kind: 'win' } : { title: 'ПОРАЖЕНИЕ', kind: 'lose' };
     return { title: 'ПО ОЧКАМ!', kind: 'win' };
   }
-  if (mode === 'bot' && outcome === 1) return { title: 'ТЕБЯ ВЫРУБИЛИ!', kind: 'lose' };
+  if (me !== null && outcome !== me) return { title: 'ТЕБЯ ВЫРУБИЛИ!', kind: 'lose' };
   return { title: 'НОКАУТ!', kind: 'ko' };
 }

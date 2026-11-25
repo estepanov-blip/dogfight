@@ -1800,3 +1800,301 @@ img {
     animation: none !important;
   }
 }
+
+/* ==========================================================================
+   ONLINE DUELS
+   ========================================================================== */
+.avatar {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #3a3245;
+  font-weight: 900;
+  font-size: 18px;
+  box-shadow: 0 0 0 2.5px var(--red);
+}
+.avatar.corner-blue {
+  box-shadow: 0 0 0 2.5px var(--blue);
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.duel-msg {
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+.loading-dots::after,
+.waiting-dots::after {
+  content: '';
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: dots 1.2s steps(4) infinite;
+}
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+.challenge {
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px;
+  background: radial-gradient(ellipse at 50% 20%, #2e2340, #16111d 70%);
+}
+.challenge-card {
+  width: 100%;
+  max-width: 400px;
+  background: #f1ece6;
+  color: #1d1622;
+  border-radius: 22px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  box-shadow: 0 0 0 3px var(--ink), 0 18px 40px rgba(0, 0, 0, 0.6);
+  transform: rotate(-1.5deg);
+  animation: card-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes card-in {
+  from { transform: rotate(-8deg) scale(0.6); opacity: 0; }
+}
+.challenge-card h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+.challenge-card .muted {
+  color: #5b5262;
+  margin: 2px 0 0;
+}
+.challenge-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+}
+.challenge-art {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: 50% 100%;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.challenge-card .btn-primary {
+  width: 88%;
+  font-size: 20px;
+  min-height: 54px;
+}
+.challenge-card .link-btn {
+  color: #3c5bb5;
+}
+
+.spin-sub {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.btn-spin.waiting:disabled {
+  filter: saturate(0.25) brightness(0.65);
+}
+.btn-danger {
+  background: rgba(227, 58, 44, 0.3);
+  color: #ffd2cc;
+}
+
+.btn-tile {
+  position: relative;
+}
+.btn-tile-hot {
+  box-shadow:
+    0 0 0 1.5px rgba(255, 204, 41, 0.6),
+    0 4px 0 #120e17;
+}
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--red);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  box-shadow: 0 0 0 2px var(--bg);
+  animation: pulse-soft 1s ease-in-out infinite;
+}
+
+.duels {
+  overflow: auto;
+  padding: calc(10px + env(safe-area-inset-top)) 14px 24px;
+  gap: 12px;
+}
+.btn-challenge {
+  font-size: 20px;
+  min-height: 54px;
+  margin: 4px 0 6px;
+}
+.leaderboard h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.lb-crown {
+  width: 30px;
+}
+.leaderboard ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.lb-row.first {
+  background: linear-gradient(90deg, rgba(255, 204, 41, 0.35), rgba(255, 204, 41, 0.08));
+  box-shadow: inset 0 0 0 1.5px rgba(255, 204, 41, 0.6);
+}
+.lb-row.is-me .lb-name {
+  color: var(--yellow);
+}
+.lb-place {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #4a4256;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 13px;
+}
+.lb-row.first .lb-place {
+  background: var(--yellow);
+  color: #2a1a00;
+}
+.lb-name {
+  flex: 1;
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lb-wins {
+  font-weight: 900;
+}
+.lb-wins small {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.empty {
+  text-align: center;
+  padding: 20px 10px;
+}
+.duel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.duel-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border: 0;
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: var(--panel);
+  cursor: pointer;
+}
+.duel-item.hot {
+  box-shadow: inset 0 0 0 2px var(--yellow);
+}
+.duel-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.duel-main b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.duel-main small {
+  color: var(--muted);
+}
+.chip-st {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  border-radius: 8px;
+  padding: 3px 7px;
+  white-space: nowrap;
+  background: #3a3245;
+}
+.st-turn {
+  background: var(--yellow);
+  color: #2a1a00;
+}
+.st-win {
+  background: #2a7a33;
+}
+.st-lose {
+  background: #7a2a24;
+}
+
+.toast {
+  position: absolute;
+  z-index: 50;
+  left: 16px;
+  right: 16px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  background: #3a1e22;
+  border: 1px solid #a0443a;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+  animation: sheet-up 0.25s ease both;
+}

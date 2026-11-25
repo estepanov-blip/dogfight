@@ -9,9 +9,15 @@ interface Props {
   setDebug: (v: boolean) => void;
   onPlay: (mode: GameMode) => void;
   onLab: () => void;
+  /** Duel server reachable and opened inside Telegram. */
+  online: boolean;
+  myTurns: number;
+  challengeBusy: boolean;
+  onChallenge: () => void;
+  onDuels: () => void;
 }
 
-export function MenuScreen({ debug, setDebug, onPlay, onLab }: Props) {
+export function MenuScreen({ debug, setDebug, onPlay, onLab, online, myTurns, challengeBusy, onChallenge, onDuels }: Props) {
   const [rules, setRules] = useState(false);
   return (
     <div className="screen menu">
@@ -40,6 +46,25 @@ export function MenuScreen({ debug, setDebug, onPlay, onLab }: Props) {
         <button className="btn btn-primary btn-play" onClick={() => onPlay('bot')} autoFocus>
           Играть <span className="play-tri">▶</span>
         </button>
+        {online && (
+          <div className="menu-row">
+            <button className="btn btn-dark btn-tile btn-tile-hot" onClick={onChallenge} disabled={challengeBusy}>
+              <span className="tile-ico">📨</span>
+              <span>
+                {challengeBusy ? 'Готовим…' : 'Вызвать друга'}
+                <small>дуэль в Telegram</small>
+              </span>
+            </button>
+            <button className="btn btn-dark btn-tile" onClick={onDuels}>
+              <span className="tile-ico">🏆</span>
+              <span>
+                Мои дуэли
+                <small>{myTurns > 0 ? `твой ход: ${myTurns}` : 'и рейтинг чата'}</small>
+              </span>
+              {myTurns > 0 && <span className="badge">{myTurns}</span>}
+            </button>
+          </div>
+        )}
         <div className="menu-row">
           <button className="btn btn-dark btn-tile" onClick={() => onPlay('local')}>
             <span className="tile-ico">👥</span>
