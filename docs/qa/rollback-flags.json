@@ -1,0 +1,13 @@
+{
+ "paused": {
+  "jobs_paused_no_auto_spins": true,
+  "manual_still_works": true,
+  "settlement_paused_pending": true,
+  "bones_untouched": true
+ },
+ "resumed": {
+  "settled_after_resume": true,
+  "loser_bones": 550,
+  "auto_resumed_and_finished": true
+ }
+}

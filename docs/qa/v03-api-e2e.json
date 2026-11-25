@@ -1,0 +1,192 @@
+{
+ "passed": 31,
+ "total": 31,
+ "results": [
+  {
+   "qa": "QA-08",
+   "check": "first wallet access grants 500 once",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-11",
+   "check": "unknown fighter id is rejected",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-11",
+   "check": "mirror match snapshot at acceptance",
+   "result": "Passed",
+   "detail": "['psikh', 'psikh']"
+  },
+  {
+   "qa": "QA-11",
+   "check": "profile change does not alter an active duel",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-06",
+   "check": "v0.3 duel has a 24 h deadline",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-04",
+   "check": "stranger cannot toggle auto",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-04",
+   "check": "auto on the opponent's turn is stored and waits",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-04",
+   "check": "no spin happens for the waiting side",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-04",
+   "check": "auto/auto finishes with no client actions",
+   "result": "Passed",
+   "detail": "10.0s, spins=10"
+  },
+  {
+   "qa": "QA-13",
+   "check": "auto/auto duration (local) recorded",
+   "result": "Passed",
+   "detail": "10.0s for 10 spins"
+  },
+  {
+   "qa": "QA-08",
+   "check": "rated auto result settles +100/-50",
+   "result": "Passed",
+   "detail": "{\"outcome\": 1, \"reason\": \"ko\", \"rated\": \"rated\", \"finalizedAt\": 1795605821159, \"myDelta\": {\"nominal\": -50, \"actual\": -50}}"
+  },
+  {
+   "qa": "QA-05",
+   "check": "4 parallel manual spins for the same number -> 1 spin",
+   "result": "Passed",
+   "detail": "[True, False, False, False]"
+  },
+  {
+   "qa": "QA-05",
+   "check": "manual press vs auto job for the same spin -> one spin",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-10",
+   "check": "two concurrent surrenders -> one result",
+   "result": "Passed",
+   "detail": "['over', 409]"
+  },
+  {
+   "qa": "QA-10",
+   "check": "surrender after both spun is ordinary",
+   "result": "Passed",
+   "detail": "surrender"
+  },
+  {
+   "qa": "QA-10",
+   "check": "two concurrent rematch requests -> one new duel",
+   "result": "Passed",
+   "detail": "[{'id': 'jhqyyTAehmbd'}, {'id': 'jhqyyTAehmbd'}]"
+  },
+  {
+   "qa": "QA-10",
+   "check": "the loser opens the rematch; auto off",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-07",
+   "check": "first five results of the pair today are rated, the 6th friendly",
+   "result": "Passed",
+   "detail": "[('rated', 'early_surrender', {'nominal': -50, 'actual': -50}), ('rated', 'early_surrender', {'nominal': -50, 'actual': -50}), ('rated', 'early_surrender', {'nominal': -50, 'actual': -50}), ('rated', 'early_surrender', {'nominal': -50, 'actual': -50}), ('rated', 'early_surrender', {'nominal': -50, 'actual': -50}), ('friendly', 'early_surrender', {'nominal': 0, 'actual': 0})]"
+  },
+  {
+   "qa": "QA-08",
+   "check": "early surrender = technical: loser -50 x5, winner 0; friendly 0",
+   "result": "Passed",
+   "detail": "E 500->500, F 500->250"
+  },
+  {
+   "qa": "QA-08",
+   "check": "ledger has explicit zero entry for the friendly duel",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-09",
+   "check": "rivals: rated 5-0, friendly 1-0 shown separately",
+   "result": "Passed",
+   "detail": "{\"opponent\": {\"id\": 9202, \"name\": \"Фёдор\"}, \"wins\": 5, \"losses\": 0, \"draws\": 0, \"friendly\": {\"wins\": 1, \"losses\": 0, \"draws\": 0}, \"winRate\": 1, \"lastAt\": 1795605824197}"
+  },
+  {
+   "qa": "QA-09",
+   "check": "group week board counts rated only",
+   "result": "Passed",
+   "detail": "[{\"id\": 9201, \"name\": \"Ева\", \"wins\": 5, \"losses\": 0, \"draws\": 0, \"winRate\": 1, \"legacy\": null}, {\"id\": 9202, \"name\": \"Фёдор\", \"wins\": 0, \"losses\": 5, \"draws\": 0, \"winRate\": 0, \"legacy\": null}]"
+  },
+  {
+   "qa": "QA-09",
+   "check": "another group sees its own (empty) board",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-09",
+   "check": "private chat has no group board",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-09",
+   "check": "a stranger gets no head-to-head of others",
+   "result": "Passed",
+   "detail": ""
+  },
+  {
+   "qa": "QA-06",
+   "check": "1 h reminder to the player on turn, once",
+   "result": "Passed",
+   "detail": "⏰ Твой ход в бою против <b>Гена</b>. Через 23 ч — техническое поражение."
+  },
+  {
+   "qa": "QA-06",
+   "check": "12 h reminder sent once more (total 2)",
+   "result": "Passed",
+   "detail": "⏰ Твой ход в бою против <b>Гена</b>. Через 23 ч — техническое поражение. | ⏰ Твой ход в бою против <b>Гена</b>. Через 12 ч — техническое поражение."
+  },
+  {
+   "qa": "QA-06",
+   "check": "24 h -> technical loss of the side on turn",
+   "result": "Passed",
+   "detail": "{\"outcome\": 0, \"reason\": \"turn_timeout\", \"rated\": \"rated\", \"finalizedAt\": 1795605830358, \"myDelta\": {\"nominal\": 0, \"actual\": 0}}"
+  },
+  {
+   "qa": "QA-06",
+   "check": "a spin after the deadline is refused",
+   "result": "Passed",
+   "detail": "{'status': 409, 'error': 'not_active', 'message': 'Бой ещё не начался или уже закончен'}"
+  },
+  {
+   "qa": "QA-12",
+   "check": "timeout messages are neutral and sent",
+   "result": "Passed",
+   "detail": "🏆 Победа: у соперника вышло время хода. | ⌛ Техническое поражение: время хода вышло. -50 костей."
+  },
+  {
+   "qa": "QA-12",
+   "check": "no gendered verb forms in bot messages",
+   "result": "Passed",
+   "detail": ""
+  }
+ ]
+}

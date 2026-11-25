@@ -1,0 +1,134 @@
+[
+ {
+  "phase": "seed",
+  "check": "v0.2 finished duel",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "seed",
+  "check": "v0.2 active duel with spins",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "seed",
+  "check": "v0.2 group board has the finished duel",
+  "result": "Passed",
+  "detail": "[{'id': 7002, 'wins': 1, 'losses': 0, 'name': 'Ксюша'}, {'id': 7001, 'wins': 0, 'losses': 1, 'name': 'Петя'}]"
+ },
+ {
+  "phase": "forward",
+  "check": "finished v0.2 duel readable, legacy schema, Шиба/Буль",
+  "result": "Passed",
+  "detail": "['shiba', 'bull']"
+ },
+ {
+  "phase": "forward",
+  "check": "active v0.2 duel continues from its spin, no deadline",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "forward",
+  "check": "legacy duel finishes as rated=legacy with no bones",
+  "result": "Passed",
+  "detail": "{'outcome': 0, 'reason': 'ko', 'rated': 'legacy', 'finalizedAt': 1795605942773, 'myDelta': None}"
+ },
+ {
+  "phase": "forward",
+  "check": "open v0.2 challenge accepted after the update becomes v0.3",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "forward",
+  "check": "starting 500 granted once per player (repeat = no change)",
+  "result": "Passed",
+  "detail": "([500, 500], [500, 500])"
+ },
+ {
+  "phase": "forward",
+  "check": "no rewards for historical / legacy duels",
+  "result": "Passed",
+  "detail": "['start']"
+ },
+ {
+  "phase": "forward",
+  "check": "all-time board keeps v0.2 + legacy results once, marked",
+  "result": "Passed",
+  "detail": "[{'id': 7001, 'name': 'Петя', 'wins': 1, 'losses': 1, 'draws': 0, 'winRate': 0.5, 'legacy': {'wins': 1, 'losses': 1}}, {'id': 7002, 'name': 'Ксюша', 'wins': 1, 'losses': 1, 'draws': 0, 'winRate': 0.5,"
+ },
+ {
+  "phase": "forward",
+  "check": "duel list kept",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "forward",
+  "check": "rematch of a v0.2 duel is a v0.3 duel",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "rollback",
+  "check": "v0.2 code reads finished duel written by v0.3",
+  "result": "Passed",
+  "detail": "over"
+ },
+ {
+  "phase": "rollback",
+  "check": "v0.2 code reads active duel written by v0.3",
+  "result": "Passed",
+  "detail": "over"
+ },
+ {
+  "phase": "rollback",
+  "check": "v0.2 code reads open duel written by v0.3",
+  "result": "Passed",
+  "detail": "active"
+ },
+ {
+  "phase": "rollback",
+  "check": "v0.2 code reads v03duel duel written by v0.3",
+  "result": "Passed",
+  "detail": "active"
+ },
+ {
+  "phase": "rollback",
+  "check": "v0.2 code reads duel list and board",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "rollback",
+  "check": "v0.2 code can finish a v0.3 duel during rollback",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "again",
+  "check": "duel finished under v0.2 gets exactly one result after roll-forward",
+  "result": "Passed",
+  "detail": "{'outcome': 0, 'reason': 'ko', 'rated': 'rated', 'finalizedAt': 1795605956145, 'myDelta': {'nominal': 100, 'actual': 100}}"
+ },
+ {
+  "phase": "again",
+  "check": "repeat read does not change the result",
+  "result": "Passed",
+  "detail": ""
+ },
+ {
+  "phase": "again",
+  "check": "wallets moved once by +100/-50 for that duel",
+  "result": "Passed",
+  "detail": "[600, 450]"
+ },
+ {
+  "phase": "again",
+  "check": "legacy board unchanged by roll-forward",
+  "result": "Passed",
+  "detail": ""
+ }
+]

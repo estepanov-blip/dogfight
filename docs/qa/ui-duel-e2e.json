@@ -1,0 +1,19 @@
+{
+ "bones_menu": "🦴 500",
+ "b_auto_on": true,
+ "b_auto_off": true,
+ "spins_clicked": {
+  "A": 3,
+  "B": 5
+ },
+ "server_spins": 8,
+ "a_title": "ТЕБЯ ВЫРУБИЛИ!",
+ "b_title": "НОКАУТ!",
+ "a_status": "Рейтинговый бой · -50 🦴\n\nЛичный счёт: 0 : 1",
+ "b_status": "Рейтинговый бой · +100 🦴\n\nЛичный счёт: 1 : 0",
+ "rng_hidden": true,
+ "same_rematch": true,
+ "forfeit_title_b": "БОЙ СДАН",
+ "forfeit_status_b": "РАННЯЯ СДАЧА — ТЕХНИЧЕСКОЕ ПОРАЖЕНИЕ\n\nРейтинговый бой · -50 🦴\n\nЛичный счёт: 1 : 1",
+ "errors": []
+}
