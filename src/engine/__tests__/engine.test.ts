@@ -18,7 +18,11 @@ import {
 } from '..';
 import raw from '../../../docs/balance.json';
 
-const B = BALANCE;
+/**
+ * v0.2 combat fixture: the mechanics tests below were written for the original rules
+ * (nobody starts with a shield). DEC-04's start shield has its own tests at the end.
+ */
+const B: Balance = { ...BALANCE, rules: { ...BALANCE.rules, secondStartShield: 0 } };
 const fresh = (starter: 0 | 1 = 0) => createBattle(B, { seed: 42, starter });
 const turn = (s: BattleState, forced: SymbolId[], b: Balance = B) => takeTurn(s, b, { forced });
 const withHp = (s: BattleState, a: number, b: number): BattleState => ({
@@ -35,6 +39,7 @@ describe('balance.json', () => {
     expect(B.symbols.punch.damage).toBe(raw.symbols.punch.damage);
     expect(B.triples.critical.damage).toBe(raw.triples.critical.damage);
     expect(B.rules.maxSpins).toBe(40);
+    expect(BALANCE.rules.secondStartShield).toBe(raw.rules.secondStartShield);
   });
   it('rejects broken data', () => {
     expect(() => parseBalance({ ...raw, hp: -1 })).toThrow();
@@ -43,7 +48,7 @@ describe('balance.json', () => {
   });
   it('fills default rules when absent', () => {
     const { rules: _r, ...noRules } = raw;
-    expect(parseBalance(noRules).rules).toEqual({ maxSpins: 40, maxExtraTurnsInRow: 2, maxExtraPerMixedSpin: 1 });
+    expect(parseBalance(noRules).rules).toEqual({ maxSpins: 40, maxExtraTurnsInRow: 2, maxExtraPerMixedSpin: 1, secondStartShield: 0 });
   });
 });
 
@@ -437,5 +442,31 @@ describe('FC-04 simulator-only experiment knobs (production default = v0.2)', ()
     const r = turn(s, ['miss', 'miss', 'miss'], hold); // P0 self-damage 30
     expect(r.state.fighters[0].hp).toBe(70);
     expect(r.state.fighters[0].shield).toBe(10);
+  });
+});
+
+describe('DEC-04 start shield 10 for the second fighter (docs/balance.json)', () => {
+  it('is read from balance.json and validated', () => {
+    expect(BALANCE.rules.secondStartShield).toBe(10);
+    expect(() => parseBalance({ ...raw, rules: { ...raw.rules, secondStartShield: -1 } })).toThrow();
+    expect(() => parseBalance({ ...raw, rules: { ...raw.rules, secondStartShield: 2.5 } })).toThrow();
+  });
+  it('the fighter who spins second starts with shield 10; the starter with none', () => {
+    expect(createBattle(BALANCE, { seed: 1, starter: 0 }).fighters.map((f) => f.shield)).toEqual([0, 10]);
+    expect(createBattle(BALANCE, { seed: 1, starter: 1 }).fighters.map((f) => f.shield)).toEqual([10, 0]);
+  });
+  it('absorbs the first positive hit and is gone; v0.2 burning rule still applies on own turn', () => {
+    const s = createBattle(BALANCE, { seed: 1, starter: 0 });
+    const r = takeTurn(s, BALANCE, { forced: ['punch', 'punch', 'miss'] });
+    expect(r.record.absorbed).toBe(10);
+    expect(r.state.fighters[1]).toEqual({ hp: 90, shield: 0 });
+    const z = takeTurn(s, BALANCE, { forced: ['heal', 'miss', 'miss'] }); // no damage -> shield kept
+    expect(z.state.fighters[1].shield).toBe(10);
+    const own = takeTurn(z.state, BALANCE, { forced: ['miss', 'miss', 'heal'] }); // P1's own turn
+    expect(own.record.shieldExpired).toBe(10);
+  });
+  it('rematch moves the start shield to the new second fighter', () => {
+    const s = createBattle(BALANCE, { seed: 1, starter: 0 });
+    expect(createRematch(s, BALANCE, 2).fighters.map((f) => f.shield)).toEqual([10, 0]);
   });
 });

@@ -37,10 +37,10 @@ export interface ReelView {
  * Presentation-only timeline for one spin. Knows nothing about where the
  * TurnRecord came from (local engine, bot or the duel server).
  */
-export function useAnimator(speed: number) {
+export function useAnimator(speed: number, initial?: View) {
   const timers = useRef<number[]>([]);
   const idSeq = useRef(1);
-  const [view, setView] = useState<View>({ hp: [BALANCE.hp, BALANCE.hp], shield: [0, 0] });
+  const [view, setView] = useState<View>(() => initial ?? { hp: [BALANCE.hp, BALANCE.hp], shield: [0, 0] });
   const [reel, setReel] = useState<ReelView>({
     symbols: ['punch', 'heal', 'punch'],
     prev: ['punch', 'heal', 'punch'],

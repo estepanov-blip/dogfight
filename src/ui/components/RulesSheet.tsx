@@ -57,6 +57,9 @@ export function RulesSheet({ onClose }: { onClose: () => void }) {
             {r.maxExtraTurnsInRow} доп. ходов.
           </li>
           <li>Урон и самоурон применяются одновременно: двойной нокаут — ничья.</li>
+          {r.secondStartShield > 0 && (
+            <li>Кто ходит вторым, начинает бой со щитом {r.secondStartShield} — это уравнивает шансы с тем, кто бьёт первым.</li>
+          )}
           <li>Лимит — {r.maxSpins} вращений на бой, затем победа по HP или ничья.</li>
         </ul>
       </section>
