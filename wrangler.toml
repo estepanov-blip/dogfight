@@ -20,5 +20,15 @@ new_sqlite_classes = ["GameStore"]
 [observability]
 enabled = true
 
+# Previews (non-main branches; Workers Builds runs `npx wrangler preview`).
+# Previews inherit nothing: each one gets its own isolated GameStore namespace,
+# no vars and no secrets (no BOT_TOKEN, so Telegram auth and the bot stay off).
+# Production (`wrangler deploy` from main) ignores this block.
+[previews]
+
+[[previews.durable_objects.bindings]]
+name = "STORE"
+class_name = "GameStore"
+
 # Secret (set in the dashboard: Settings -> Variables and Secrets, type Secret):
 #   BOT_TOKEN = <token from @BotFather>
