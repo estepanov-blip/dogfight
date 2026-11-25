@@ -15,14 +15,14 @@ export const ECONOMY = {
   winDelta: 100, // APPROVED DFC-002
   lossDelta: -50, // APPROVED DFC-002
   ratedPerOpponentPerDay: 5, // APPROVED DFC-005
-  // Proposed
+  // Approved by the owner 2026-11-25 (DEC-02/03); minimum balance and draw stay as specified
   drawDelta: 0,
   minimumBalance: 0,
   technicalWinnerDelta: 0,
   technicalLoserDelta: -50,
 } as const;
 
-/** Proposed timings (docs/releases/v0.3.md). */
+/** Timings approved by the owner 2026-11-25 (DEC-01). */
 export const TIMING_V03 = {
   turnTimeoutMs: 24 * 3600_000,
   reminderOffsetsMs: [1 * 3600_000, 12 * 3600_000],
