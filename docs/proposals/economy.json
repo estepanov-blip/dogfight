@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed",
+  "currency": {
+    "code": "BONES",
+    "displayName": "Кости"
+  },
+  "approved": {
+    "decisionIds": [
+      "DFC-002",
+      "DFC-005"
+    ],
+    "startingBalance": 500,
+    "winDelta": 100,
+    "lossDelta": -50,
+    "ratedMatchesPerOpponentPerDay": 5
+  },
+  "proposed": {
+    "minimumBalance": 0,
+    "drawDelta": 0,
+    "playWithZeroBalance": true,
+    "eligibleMode": "rated_pvp",
+    "friendlyDelta": 0,
+    "technicalOutcome": {
+      "winnerDelta": 0,
+      "loserDelta": -50
+    },
+    "surrender": {
+      "ordinaryOutcomeAfterBothPlayersSpin": true
+    },
+    "pairLimit": {
+      "timezone": "UTC",
+      "assignment": "first_finalized",
+      "scope": "unordered_pair_across_chats",
+      "overLimit": "friendly",
+      "countDraws": true,
+      "countTechnicalOutcomes": true
+    },
+    "migration": {
+      "grantStartingBalanceOnce": true,
+      "rewardHistoricalDuels": false,
+      "applyToActiveLegacyDuels": false
+    }
+  }
+}

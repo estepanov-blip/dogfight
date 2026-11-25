@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed",
+  "approved": {
+    "decisionId": "DFC-004",
+    "count": 8,
+    "freeForAll": true,
+    "identicalCombatStats": true
+  },
+  "proposed": {
+    "combatProfile": "shared",
+    "combatConfigPath": "docs/balance.json",
+    "allowMirrorMatches": true,
+    "snapshotOnDuelAcceptance": true,
+    "legacyRoleDefaults": {
+      "challenger": "shiba",
+      "accepter": "bull"
+    }
+  },
+  "characters": [
+    {
+      "id": "shiba",
+      "name": "Сиба",
+      "breed": "Сиба-ину",
+      "assetKey": "shiba",
+      "assetStatus": "existing",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "bull",
+      "name": "Буль",
+      "breed": "Бультерьер",
+      "assetKey": "bull",
+      "assetStatus": "existing",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "chih",
+      "name": "Чих",
+      "breed": "Чихуахуа",
+      "assetKey": "chih",
+      "assetStatus": "placeholder",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "puzan",
+      "name": "Пузан",
+      "breed": "Мопс",
+      "assetKey": "puzan",
+      "assetStatus": "placeholder",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "psikh",
+      "name": "Псих",
+      "breed": "Хаски",
+      "assetKey": "psikh",
+      "assetStatus": "placeholder",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "heavy",
+      "name": "Тяжёлый",
+      "breed": "Ротвейлер",
+      "assetKey": "heavy",
+      "assetStatus": "placeholder",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "kolbasa",
+      "name": "Колбаса",
+      "breed": "Такса",
+      "assetKey": "kolbasa",
+      "assetStatus": "placeholder",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "pushok",
+      "name": "Пушок",
+      "breed": "Померанский шпиц",
+      "assetKey": "pushok",
+      "assetStatus": "placeholder",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    }
+  ]
+}
