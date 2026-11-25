@@ -1,0 +1,54 @@
+{
+  "hp": 100,
+  "reels": 3,
+  "symbols": {
+    "punch": {
+      "weight": 40,
+      "damage": 10
+    },
+    "critical": {
+      "weight": 15,
+      "damage": 20
+    },
+    "block": {
+      "weight": 15,
+      "shield": 10
+    },
+    "heal": {
+      "weight": 15,
+      "heal": 10
+    },
+    "extra": {
+      "weight": 5,
+      "extra": 1
+    },
+    "miss": {
+      "weight": 10
+    }
+  },
+  "triples": {
+    "punch": {
+      "damage": 40
+    },
+    "critical": {
+      "damage": 75
+    },
+    "block": {
+      "shield": 100
+    },
+    "heal": {
+      "heal": 50
+    },
+    "extra": {
+      "extra": 2
+    },
+    "miss": {
+      "selfDamage": 30
+    }
+  },
+  "rules": {
+    "maxSpins": 40,
+    "maxExtraTurnsInRow": 2,
+    "maxExtraPerMixedSpin": 1
+  }
+}
