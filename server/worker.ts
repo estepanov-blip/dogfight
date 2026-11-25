@@ -8,24 +8,23 @@
  *   GET  /api/me                  — profile, my duels, chat leaderboard
  *   POST /api/duels               — create an open challenge (+ prepared share message)
  *   GET  /api/duels/:id           — duel state
- *   POST /api/duels/:id/accept|spin|forfeit|rematch|share
+ *   POST /api/duels/:id/accept|spin|forfeit|rematch|share|auto
+ *   POST /api/profile             — choose a fighter (v0.3, DFC-004)
+ *   GET  /api/rivals              — "Мои соперники" + bones ledger (v0.3, DFC-003)
+ *   POST /api/dev/duels/:id/shift — local tests only (DEV_MODE=1)
  *
  * All /api/* calls except health/setup require `Authorization: tma <initData>`.
  */
-import { GameStore, type DuelOp, type DuelOpResult, type StoreApi } from './store';
-import { createDuel, isOnline, newDuelId, toSummary, toView, type DuelRecord } from './duel';
+import { GameStore, type DuelOp, type StoreApi } from './store';
+import { createDuel, newDuelId, playerIndex, toSummary, toView, type DuelRecord } from './duel';
+import type { Env } from './env';
 import { BotApi, escapeHtml, validateInitData, webhookSecret, type InitDataInfo } from './telegram';
-import type { CreateDuelResponse, MeResponse, PlayerInfo, SpinResponse } from '../src/online/protocol';
+import type { CreateDuelResponse, HeadToHead, MeResponse, PlayerInfo, RivalsResponse, SpinResponse } from '../src/online/protocol';
+import { isCharacterId } from '../src/online/v03';
+import { other } from '../src/engine';
 
 export { GameStore };
-
-export interface Env {
-  BOT_TOKEN: string;
-  /** Optional: mock Bot API base URL for local tests. */
-  TG_API_BASE?: string;
-  STORE: DurableObjectNamespace<GameStore>;
-  ASSETS: Fetcher;
-}
+export type { Env };
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -73,71 +72,6 @@ async function saveSummaries(env: Env, d: DuelRecord) {
   await Promise.all(jobs);
 }
 
-// ---------------------------------------------------------------- notifications
-async function notify(env: Env, origin: string, to: PlayerInfo, text: string, duelId: string, button = 'Открыть бой') {
-  try {
-    await tg(env).call('sendMessage', {
-      chat_id: to.id,
-      text,
-      parse_mode: 'HTML',
-      reply_markup: { inline_keyboard: [[{ text: `🥊 ${button}`, web_app: { url: `${origin}/?duel=${duelId}` } }]] },
-    });
-  } catch {
-    // user never opened the bot / did not allow messages — opt-in by design
-  }
-}
-
-async function afterChange(env: Env, origin: string, r: Extract<DuelOpResult, { ok: true }>, op: DuelOp) {
-  const d = r.duel;
-  await saveSummaries(env, d);
-  if (r.next) await saveSummaries(env, r.next);
-  const [p0, p1] = d.players;
-  if (!p1) return;
-  const now = Date.now();
-  const name = (p: PlayerInfo) => `<b>${escapeHtml(p.name)}</b>`;
-  const b = d.battle;
-
-  if (op.type === 'accept' && r.changed && b) {
-    const first = b.current === 0 ? p0 : p1;
-    await notify(env, origin, p0, `🥊 Вызов принят! ${name(p1)} на ринге. ${first.id === p0.id ? 'Ты бьёшь первым.' : `Первым бьёт ${name(first)}.`}`, d.id);
-    return;
-  }
-  if (op.type === 'rematch' && r.next) {
-    const opp = p0.id === op.userId ? p1 : p0;
-    const asker = p0.id === op.userId ? p0 : p1;
-    await notify(env, origin, opp, `🔁 ${name(asker)} требует реванш!`, r.next.id, 'Реванш');
-    return;
-  }
-  if (!b) return;
-  if (d.status === 'over' && r.prevDuel.status !== 'over') {
-    const winner = b.outcome === 'draw' || b.outcome === null ? null : d.players[b.outcome]!;
-    const loser = winner ? (winner.id === p0.id ? p1 : p0) : null;
-    if (winner && loser && d.chatInstance) await store(env, `chat:${d.chatInstance}`).recordResult(winner, loser, d.id);
-    for (const p of [p0, p1]) {
-      if (isOnline(d, p.id, now)) continue;
-      const text =
-        winner === null
-          ? `🤝 Ничья в бою ${name(p0)} vs ${name(p1)}.`
-          : winner.id === p.id
-            ? `🏆 Победа${b.endReason === 'forfeit' ? '! Соперник сдался.' : b.endReason === 'ko' ? ' нокаутом!' : ' по очкам!'}`
-            : `💥 ПРОПУСТИЛ! Победа за ${name(winner)}. Реванш?`;
-      await notify(env, origin, p, text, d.id, 'Смотреть / реванш');
-    }
-    return;
-  }
-  if (op.type === 'spin' && r.records.length) {
-    const rec = r.records[r.records.length - 1];
-    if (rec.nextActor !== null && rec.nextActor !== rec.actor) {
-      const nextP = d.players[rec.nextActor]!;
-      if (!isOnline(d, nextP.id, now)) {
-        const by = d.players[rec.actor]!;
-        const hit = rec.damageDealt > 0 ? `минус ${rec.damageDealt} HP тебе!` : 'ход сделан.';
-        await notify(env, origin, nextP, `👊 ${name(by)}: ${hit} Твой ход.\nHP: ты ${b.fighters[rec.nextActor].hp} — ${b.fighters[rec.actor].hp}`, d.id, 'Ударить в ответ');
-      }
-    }
-  }
-}
-
 // ---------------------------------------------------------------- share message
 async function prepareShare(env: Env, user: PlayerInfo, d: DuelRecord, origin: string): Promise<string | null> {
   try {
@@ -153,7 +87,7 @@ async function prepareShare(env: Env, user: PlayerInfo, d: DuelRecord, origin: s
         id: d.id,
         photo_url: `${origin}/share.jpg`,
         thumbnail_url: `${origin}/share.jpg`,
-        caption: `🥊 <b>${escapeHtml(user.name)}</b> вызывает тебя на бой!\nУдарь в ответ, пока он не убежал.`,
+        caption: `🥊 <b>${escapeHtml(user.name)}</b> вызывает тебя на бой!\nПринимай вызов — посмотрим, кто пропустит.`,
         parse_mode: 'HTML',
         reply_markup: { inline_keyboard: [[{ text: '🥊 Принять вызов', url: duelLink(bot, d.id) }]] },
       },
@@ -200,32 +134,58 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext, url: URL
   const groupChat = auth.chatType === 'group' || auth.chatType === 'supergroup' ? auth.chatInstance : null;
 
   if (path === '/api/me' && req.method === 'GET') {
-    const [duels, leaderboard, bot] = await Promise.all([
-      store(env, `user:${user.id}`).listSummaries(),
-      groupChat ? store(env, `chat:${groupChat}`).leaderboard() : Promise.resolve(null),
+    const me = store(env, `user:${user.id}`);
+    const [duels, wallet, profile, boards, bot] = await Promise.all([
+      me.listSummaries(),
+      me.wallet(now), // first access grants the starting 500 once
+      me.profile(),
+      groupChat ? store(env, `chat:${groupChat}`).boards(now) : Promise.resolve(null),
       botUsername(env),
     ]);
-    return json({ user, bot, duels, leaderboard } satisfies MeResponse);
+    return json({ user, bot, duels, leaderboard: boards ? boards.all.slice(0, 20) : null, wallet, profile, boards } satisfies MeResponse);
+  }
+
+  if (path === '/api/profile' && req.method === 'POST') {
+    const body = (await req.json().catch(() => ({}))) as { fighter?: unknown };
+    if (!isCharacterId(body.fighter)) return fail(400, 'bad_fighter', 'Такого бойца нет');
+    return json(await store(env, `user:${user.id}`).setProfile(body.fighter));
+  }
+
+  if (path === '/api/rivals' && req.method === 'GET') {
+    const me = store(env, `user:${user.id}`);
+    const [rivals, ledger] = await Promise.all([me.rivals(), me.ledger()]);
+    return json({ rivals, ledger } satisfies RivalsResponse);
+  }
+
+  const dev = path.match(/^\/api\/dev\/duels\/([A-Za-z0-9]{6,32})\/shift$/);
+  if (dev) {
+    if (env.DEV_MODE !== '1') return fail(404, 'not_found', 'Нет такого метода');
+    const body = (await req.json().catch(() => ({}))) as { ms?: number };
+    const r = await store(env, `duel:${dev[1]}`).mutate({ type: 'devShift', ms: Number(body.ms) || 0, now, origin });
+    return r.ok ? json({ ok: true, turnDueAt: r.duel.turnDueAt }) : fail(r.status, r.code, r.message);
   }
 
   if (path === '/api/duels' && req.method === 'POST') {
-    const d = createDuel(newDuelId(random), user, randomSeed(), now);
+    const d = createDuel(newDuelId(random), user, randomSeed(), now, origin);
     await store(env, `duel:${d.id}`).putDuel(d);
     await saveSummaries(env, d);
     const [prepared, bot] = await Promise.all([prepareShare(env, user, d, origin), botUsername(env)]);
     return json({ duel: toView(d, user.id, duelLink(bot, d.id)), prepared } satisfies CreateDuelResponse, 201);
   }
 
-  const m = path.match(/^\/api\/duels\/([A-Za-z0-9]{6,32})(?:\/(accept|spin|forfeit|rematch|share))?$/);
+  const m = path.match(/^\/api\/duels\/([A-Za-z0-9]{6,32})(?:\/(accept|spin|forfeit|rematch|share|auto))?$/);
   if (!m) return fail(404, 'not_found', 'Нет такого метода');
   const [, id, action] = m;
   const stub = store(env, `duel:${id}`);
   const bot = await botUsername(env);
 
   if (!action && req.method === 'GET') {
-    const r = await stub.mutate({ type: 'touch', userId: user.id, now });
+    const r = await stub.mutate({ type: 'touch', userId: user.id, now, origin });
     if (!r.ok) return fail(r.status, r.code, r.message);
-    return json(toView(r.duel, user.id, duelLink(bot, id)));
+    let d = r.duel;
+    if (r.changed) ctx.waitUntil(saveSummaries(env, d));
+    if (d.result?.settlement.state === 'pending') d = (await stub.settleNow()) ?? d; // fresh result screen
+    return json(toView(d, user.id, duelLink(bot, id), await h2hFor(env, d, user.id)));
   }
   if (req.method !== 'POST') return fail(405, 'method', 'POST only');
 
@@ -235,25 +195,50 @@ async function handleApi(req: Request, env: Env, ctx: ExecutionContext, url: URL
     return json({ prepared: await prepareShare(env, user, d, origin) });
   }
 
-  const body = (await req.json().catch(() => ({}))) as { expected?: number };
+  const body = (await req.json().catch(() => ({}))) as { expected?: number; on?: boolean };
   let op: DuelOp;
-  if (action === 'accept') op = { type: 'accept', user, now, chatInstance: groupChat };
-  else if (action === 'spin') op = { type: 'spin', userId: user.id, expected: Number(body.expected), now };
-  else if (action === 'forfeit') op = { type: 'forfeit', userId: user.id, now };
+  if (action === 'accept') {
+    const d = await stub.getDuel();
+    if (!d) return fail(404, 'not_found', 'Бой не найден');
+    op = { type: 'accept', user, now, chatInstance: groupChat, fighters: await profileFighters(env, d.players[0].id, user.id), origin };
+  } else if (action === 'spin') op = { type: 'spin', userId: user.id, expected: Number(body.expected), now, origin };
+  else if (action === 'forfeit') op = { type: 'forfeit', userId: user.id, now, origin };
+  else if (action === 'auto') op = { type: 'auto', userId: user.id, on: !!body.on, now, origin };
   else {
-    const newId = newDuelId(random);
-    op = { type: 'rematch', userId: user.id, newId, seed: randomSeed(), now };
+    const d = await stub.getDuel();
+    if (!d) return fail(404, 'not_found', 'Бой не найден');
+    const fighters: [string | null, string | null] = d.players[1] ? await profileFighters(env, d.players[0].id, d.players[1].id) : [null, null];
+    op = { type: 'rematch', userId: user.id, newId: newDuelId(random), seed: randomSeed(), now, fighters, origin };
   }
 
   const r = await stub.mutate(op);
   if (!r.ok) return fail(r.status, r.code, r.message);
   if (r.next) await store(env, `duel:${r.next.id}`).putDuel(r.next);
-  if (r.changed) ctx.waitUntil(afterChange(env, origin, r, op));
+  if (r.changed) {
+    ctx.waitUntil(saveSummaries(env, r.duel));
+    if (r.next) ctx.waitUntil(saveSummaries(env, r.next));
+  }
 
   if (op.type === 'rematch') return json({ id: r.duel.rematchId });
-  const view = toView(r.duel, user.id, duelLink(bot, id));
+  let d = r.duel;
+  if (d.result?.settlement.state === 'pending') d = (await stub.settleNow()) ?? d;
+  const view = toView(d, user.id, duelLink(bot, id), await h2hFor(env, d, user.id));
   if (op.type === 'spin') return json({ duel: view, records: r.records, stale: r.stale } satisfies SpinResponse);
   return json(view);
+}
+
+/** Profile choices at this moment (null = never chose -> v0.2 role default). */
+async function profileFighters(env: Env, challengerId: number, accepterId: number): Promise<[string | null, string | null]> {
+  const [a, b] = await Promise.all([store(env, `user:${challengerId}`).profile(), store(env, `user:${accepterId}`).profile()]);
+  return [a.fighter, b.fighter];
+}
+
+/** Rated head-to-head for the result screen (only once the fight is over). */
+async function h2hFor(env: Env, d: DuelRecord, viewerId: number): Promise<HeadToHead | null> {
+  const me = playerIndex(d, viewerId);
+  if (d.status !== 'over' || me === null) return null;
+  const opp = d.players[other(me)];
+  return opp ? store(env, `user:${viewerId}`).headToHead(opp.id) : null;
 }
 
 async function handleWebhook(req: Request, env: Env, url: URL): Promise<Response> {

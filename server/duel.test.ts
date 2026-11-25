@@ -51,7 +51,7 @@ describe('duel lifecycle', () => {
   it('cannot accept own challenge; third player cannot take a started duel; re-accept is idempotent', () => {
     expect(() => acceptDuel(createDuel('x', A, 1, T0), A, T0, null)).toThrow(DuelError);
     const d = started();
-    expect(() => acceptDuel(d, C, T0, null)).toThrow(/уже принял/);
+    expect(() => acceptDuel(d, C, T0, null)).toThrow(/уже принят/);
     expect(acceptDuel(d, B, T0, null).changed).toBe(false);
   });
   it('only the current player can spin; stale expected values do nothing', () => {
