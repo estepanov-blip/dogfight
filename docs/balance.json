@@ -49,6 +49,7 @@
   "rules": {
     "maxSpins": 40,
     "maxExtraTurnsInRow": 2,
-    "maxExtraPerMixedSpin": 1
+    "maxExtraPerMixedSpin": 1,
+    "secondStartShield": 10
   }
 }

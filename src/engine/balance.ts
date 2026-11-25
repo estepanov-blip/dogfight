@@ -5,6 +5,7 @@ export const DEFAULT_RULES: RulesConfig = {
   maxSpins: 40,
   maxExtraTurnsInRow: 2,
   maxExtraPerMixedSpin: 1,
+  secondStartShield: 0,
 };
 
 const EFFECT_KEYS: (keyof EffectValues)[] = ['damage', 'shield', 'heal', 'extra', 'selfDamage'];
@@ -76,4 +77,12 @@ export const BALANCE: Balance = parseBalance(rawBalance);
 
 export function totalWeight(b: Balance): number {
   return SYMBOL_IDS.reduce((sum, id) => sum + b.symbols[id].weight, 0);
+}
+
+/**
+ * Short id of the combat rules a battle starts with (stored on v0.3 duels).
+ * v0.2 = the original rules; changes to the rules block get their own id.
+ */
+export function rulesVersion(b: Balance): string {
+  return b.rules.secondStartShield > 0 ? `v0.3-s${b.rules.secondStartShield}` : 'v0.2';
 }

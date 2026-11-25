@@ -16,7 +16,10 @@ export interface BattleOptions {
 export function useBattle({ mode, seed, speed, botPaused }: BattleOptions) {
   const [session] = useState(() => new BattleSession(BALANCE, mode, seed ?? randomSeed()));
   const [, rerender] = useReducer((x: number) => x + 1, 0);
-  const anim = useAnimator(speed);
+  const anim = useAnimator(speed, {
+    hp: [session.state.fighters[0].hp, session.state.fighters[1].hp],
+    shield: [session.state.fighters[0].shield, session.state.fighters[1].shield], // start shield (DEC-04)
+  });
   const [showResult, setShowResult] = useState(false);
 
   useEffect(() => session.subscribe(rerender), [session]);

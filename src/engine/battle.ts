@@ -14,7 +14,7 @@ export function other(p: PlayerIndex): PlayerIndex {
 export function createBattle(balance: Balance, opts: CreateBattleOptions): BattleState {
   const seed = normalizeSeed(opts.seed);
   const starter = opts.starter ?? 0;
-  const startShield = Math.max(0, balance.experiment?.secondStartShield ?? 0);
+  const startShield = Math.max(0, balance.experiment?.secondStartShield ?? balance.rules.secondStartShield);
   const fighters: BattleState['fighters'] = [
     { hp: balance.hp, shield: 0 },
     { hp: balance.hp, shield: 0 },

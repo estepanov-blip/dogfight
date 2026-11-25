@@ -27,6 +27,8 @@ export interface RulesConfig {
   maxExtraTurnsInRow: number;
   /** Lightning symbols in a non-triple spin give at most this many extra turns. */
   maxExtraPerMixedSpin: number;
+  /** Shield the fighter who spins second starts the battle with (DEC-04, Q02). 0 = v0.2. */
+  secondStartShield: number;
 }
 
 export interface Balance {
