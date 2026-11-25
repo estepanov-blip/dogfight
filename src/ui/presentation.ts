@@ -12,6 +12,14 @@ import healImg from '../assets/game/sym_heal.png';
 import extraImg from '../assets/game/sym_extra.png';
 import missImg from '../assets/game/sym_miss.png';
 import ringImg from '../assets/game/ring.jpg';
+import chihImg from '../assets/game/fighters/chih.png';
+import puzanImg from '../assets/game/fighters/puzan.png';
+import psikhImg from '../assets/game/fighters/psikh.png';
+import heavyImg from '../assets/game/fighters/heavy.png';
+import kolbasaImg from '../assets/game/fighters/kolbasa.png';
+import pushokImg from '../assets/game/fighters/pushok.png';
+import { CHARACTERS, characterById } from '../online/v03';
+import type { DuelView } from '../online/protocol';
 
 export const RING_IMG = ringImg;
 
@@ -45,6 +53,32 @@ export const FIGHTER_LOOK: [FighterLook, FighterLook] = [
   { sprite: shibaImg, flip: false, corner: 'red', breed: 'Сиба' },
   { sprite: bullImg, flip: true, corner: 'blue', breed: 'Буль' },
 ];
+
+/** Asset map: character id -> sprite (FC-18). Unknown ids fall back to Шиба/Буль by side. */
+export const FIGHTER_SPRITES: Record<string, string> = {
+  shiba: shibaImg,
+  bull: bullImg,
+  chih: chihImg,
+  puzan: puzanImg,
+  psikh: psikhImg,
+  heavy: heavyImg,
+  kolbasa: kolbasaImg,
+  pushok: pushokImg,
+};
+
+/** Look of a character on a side: left faces right, right is mirrored; corner colour by side. */
+export function lookFor(id: string | null | undefined, side: 0 | 1): FighterLook {
+  const c = characterById(id);
+  const fallback = FIGHTER_LOOK[side];
+  return {
+    sprite: (c && FIGHTER_SPRITES[c.assetKey]) || fallback.sprite,
+    flip: side === 1,
+    corner: side === 0 ? 'red' : 'blue',
+    breed: c?.name ?? fallback.breed,
+  };
+}
+
+export { CHARACTERS };
 
 export function fighterNames(mode: GameMode): [string, string] {
   return mode === 'bot' ? ['ТЫ', 'САНЯ'] : ['СИБА', 'БУЛЬ'];
@@ -169,9 +203,13 @@ export function outcomeTitle(
   me: PlayerIndex | null,
 ): { title: string; kind: 'ko' | 'win' | 'lose' | 'draw' } {
   if (outcome === 'draw') return { title: endReason === 'doubleKo' ? 'ДВОЙНОЙ НОКАУТ!' : 'НИЧЬЯ!', kind: 'draw' };
+  if (endReason === 'timeout') {
+    if (me === null) return { title: 'ВРЕМЯ ВЫШЛО', kind: 'win' };
+    return outcome === me ? { title: 'ПОБЕДА!', kind: 'win' } : { title: 'ТЕХНИЧЕСКОЕ ПОРАЖЕНИЕ', kind: 'lose' };
+  }
   if (endReason === 'forfeit') {
-    if (me === null) return { title: 'СДАЛСЯ!', kind: 'win' };
-    return outcome === me ? { title: 'ПОБЕДА!', kind: 'win' } : { title: 'ТЫ СДАЛСЯ', kind: 'lose' };
+    if (me === null) return { title: 'СДАЧА!', kind: 'win' };
+    return outcome === me ? { title: 'ПОБЕДА!', kind: 'win' } : { title: 'БОЙ СДАН', kind: 'lose' };
   }
   if (endReason === 'spinLimit') {
     if (me !== null) return outcome === me ? { title: 'ПОБЕДА!', kind: 'win' } : { title: 'ПОРАЖЕНИЕ', kind: 'lose' };
@@ -180,3 +218,20 @@ export function outcomeTitle(
   if (me !== null && outcome !== me) return { title: 'ТЕБЯ ВЫРУБИЛИ!', kind: 'lose' };
   return { title: 'НОКАУТ!', kind: 'ko' };
 }
+
+// ---------------------------------------------------------------- online duel names
+
+function short(name: string) {
+  const n = name.trim().split(/\s+/)[0] ?? name;
+  return (n.length > 10 ? n.slice(0, 9) + '…' : n).toUpperCase();
+}
+
+export function duelNames(d: DuelView): [string, string] {
+  const label = (i: PlayerIndex) => {
+    const p = d.players[i];
+    if (d.me === i) return 'ТЫ';
+    return p ? short(p.name) : '???';
+  };
+  return [label(0), label(1)];
+}
+

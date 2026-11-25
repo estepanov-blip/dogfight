@@ -140,6 +140,15 @@ export function useDuel(id: string, speed: number) {
 
   const rematch = useCallback(async () => (await run(() => api.rematch(id)))?.id ?? null, [id, run]);
 
+  /** DFC-001: the UI shows only the server-confirmed flag. */
+  const toggleAuto = useCallback(
+    async (on: boolean) => {
+      const v = await run(() => api.auto(id, on));
+      if (v) accept(v, false);
+    },
+    [accept, id, run],
+  );
+
   const shownTurn: PlayerIndex | null = duel?.battle
     ? animating && anim.lastRecord
       ? anim.lastRecord.actor
@@ -158,6 +167,7 @@ export function useDuel(id: string, speed: number) {
     acceptChallenge,
     forfeit,
     rematch,
+    toggleAuto,
     reload: () => load(false),
     clearError: () => setError(null),
     closeResult: () => setShowResult(false),

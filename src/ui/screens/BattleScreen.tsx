@@ -15,6 +15,8 @@ interface Props {
   seed?: number;
   debug: boolean;
   onExit: () => void;
+  /** Character ids per side (player's choice vs the bot). */
+  fighters?: [string, string];
 }
 
 function prefersReducedMotion() {
@@ -25,7 +27,7 @@ function prefersReducedMotion() {
   }
 }
 
-export function BattleScreen({ mode, seed, debug, onExit }: Props) {
+export function BattleScreen({ mode, seed, debug, onExit, fighters }: Props) {
   const [speed, setSpeed] = useState(() => (prefersReducedMotion() ? 2 : 1));
   const [botPaused, setBotPaused] = useState(false);
   const ctl = useBattle({ mode, seed, speed, botPaused });
@@ -88,7 +90,7 @@ export function BattleScreen({ mode, seed, debug, onExit }: Props) {
         {extraNow && <span className="extra-badge">⚡ доп. ход</span>}
       </div>
 
-      <Arena anim={ctl} speed={speed} turnSide={turnSide} active={playing || animating} hideCaption={showResult} />
+      <Arena anim={ctl} speed={speed} turnSide={turnSide} active={playing || animating} hideCaption={showResult} fighters={fighters} />
 
       <section className="controls">
         <Reels reel={reel} speed={speed} />

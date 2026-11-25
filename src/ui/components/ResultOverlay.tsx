@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { battleStats, type BattleState, type PlayerIndex } from '../../engine';
 import { FIGHTER_LOOK, outcomeTitle } from '../presentation';
 import { Crown } from './Crown';
@@ -11,11 +11,13 @@ interface Props {
   onRematch: () => void;
   rematchLabel?: string;
   rematchBusy?: boolean;
+  /** v0.3: rated / friendly status, bones, head-to-head score. */
+  children?: ReactNode;
   onMenu: () => void;
   onLog: () => void;
 }
 
-export function ResultOverlay({ state, me, names, onRematch, rematchLabel, rematchBusy, onMenu, onLog }: Props) {
+export function ResultOverlay({ state, me, names, onRematch, rematchLabel, rematchBusy, onMenu, onLog, children }: Props) {
   const rematchRef = useRef<HTMLButtonElement>(null);
   useEffect(() => rematchRef.current?.focus(), []);
   if (state.outcome === null || state.endReason === null) return null;
@@ -23,7 +25,14 @@ export function ResultOverlay({ state, me, names, onRematch, rematchLabel, remat
   const stats = battleStats(state.log);
   const winner = state.outcome === 'draw' ? null : state.outcome;
   const opp = me === null ? null : names[me === 0 ? 1 : 0];
-  const how = state.endReason === 'ko' ? ' нокаутом' : state.endReason === 'forfeit' ? ' — соперник сдался' : ' по очкам';
+  const how =
+    state.endReason === 'ko'
+      ? ' нокаутом'
+      : state.endReason === 'forfeit'
+        ? ' — соперник сдаётся'
+        : state.endReason === 'timeout'
+          ? ' — у соперника вышло время хода'
+          : ' по очкам';
   const subtitle =
     winner === null
       ? state.endReason === 'doubleKo'
@@ -32,11 +41,13 @@ export function ResultOverlay({ state, me, names, onRematch, rematchLabel, remat
       : me !== null
         ? winner === me
           ? state.endReason === 'ko'
-            ? `${opp} отправлен в нокаут`
+            ? `Нокаут! ${opp} на полу`
             : `Победа${how}`
           : state.endReason === 'forfeit'
-            ? 'Ты сдался. Реванш?'
-            : `${opp} победил. Ударь в ответ!`
+            ? 'Бой сдан. Реванш?'
+            : state.endReason === 'timeout'
+              ? 'Время хода вышло. Реванш?'
+            : `Победа за ${opp}. Реванш?`
         : `${names[winner]} побеждает${how}`;
 
   const rows: [string, (i: 0 | 1) => string | number][] = [
@@ -56,6 +67,7 @@ export function ResultOverlay({ state, me, names, onRematch, rematchLabel, remat
           {title}
         </h1>
         <p className="result-sub">{subtitle}</p>
+        {children}
         <div className="result-stats">
           <div className="rs-head" />
           {[0, 1].map((i) => (

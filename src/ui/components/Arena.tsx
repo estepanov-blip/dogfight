@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { PlayerIndex } from '../../engine';
-import { RING_IMG, SYMBOL_IMG } from '../presentation';
+import { lookFor, RING_IMG, SYMBOL_IMG } from '../presentation';
 import type { Animator } from '../useAnimator';
 import { Fighter } from './Fighter';
 
@@ -10,10 +10,12 @@ interface Props {
   turnSide: PlayerIndex;
   active: boolean;
   hideCaption?: boolean;
+  /** Character ids per side (v0.3 duels and the player's choice vs the bot). */
+  fighters?: [string, string];
 }
 
 /** Ring + fighters + combat FX. Shared by local battles and online duels. */
-export function Arena({ anim, speed, turnSide, active, hideCaption }: Props) {
+export function Arena({ anim, speed, turnSide, active, hideCaption, fighters }: Props) {
   const { view, poses, caption, floats, impact, shakeKey, flashKey } = anim;
   // screen shake via WAAPI so fighters are not remounted mid-animation
   const arenaRef = useRef<HTMLElement>(null);
@@ -46,6 +48,7 @@ export function Arena({ anim, speed, turnSide, active, hideCaption }: Props) {
           shield={view.shield[i]}
           active={active && turnSide === i}
           floats={floats.filter((f) => f.side === i)}
+          look={fighters ? lookFor(fighters[i], i) : undefined}
         />
       ))}
       {impact && (

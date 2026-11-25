@@ -66,8 +66,18 @@ with sync_playwright() as p:
         pg.goto(BASE + url)
         return pg
 
-    # 1. A challenges
+    # 0. v0.3: A picks a fighter in the profile
     a = page_for(A)
+    a.get_by_role("button", name="сменить").click()
+    a.wait_for_selector(".fighter-grid", timeout=8000)
+    a.locator(".fighter-card", has_text="Колбаса").click()
+    a.screenshot(path=OUT / "00_fighters.png")
+    a.locator(".btn-challenge").click()
+    a.wait_for_selector(".menu", timeout=8000)
+    time.sleep(0.6)
+    report["bones_menu"] = a.locator(".bones-chip").inner_text() if a.locator(".bones-chip").count() else None
+
+    # 1. A challenges
     a.get_by_role("button", name="Вызвать друга").first.wait_for(timeout=8000)
     a.screenshot(path=OUT / "01_menu_online.png")
     a.get_by_role("button", name="Вызвать друга").first.click()
@@ -87,6 +97,15 @@ with sync_playwright() as p:
     b.locator(".btn-spin").wait_for(timeout=8000)
     time.sleep(0.5)
     b.screenshot(path=OUT / "04_b_started.png")
+
+    # 2b. B switches the auto-battle on and back off in the UI (server-confirmed state)
+    b.locator(".auto-switch").click()
+    time.sleep(0.8)
+    report["b_auto_on"] = b.locator(".auto-switch input").is_checked()
+    b.screenshot(path=OUT / "04b_auto.png")
+    b.locator(".auto-switch").click()
+    time.sleep(0.8)
+    report["b_auto_off"] = not b.locator(".auto-switch input").is_checked()
 
     # 3. play the whole fight; whoever's button is enabled spins
     a.wait_for_selector(".btn-spin", timeout=10000)
@@ -113,6 +132,10 @@ with sync_playwright() as p:
     report["a_title"] = a.locator(".result-title").inner_text()
     report["b_title"] = b.locator(".result-title").inner_text()
     report["a_log"] = a.locator(".link-btn").last.inner_text()
+    time.sleep(2)
+    report["a_status"] = a.locator(".result-v03").inner_text() if a.locator(".result-v03").count() else None
+    report["b_status"] = b.locator(".result-v03").inner_text() if b.locator(".result-v03").count() else None
+    a.screenshot(path=OUT / "06b_a_result_status.png")
     report["b_log"] = b.locator(".link-btn").last.inner_text()
 
     # server truth via API
@@ -144,14 +167,28 @@ with sync_playwright() as p:
     a.wait_for_selector(".duel-item", timeout=8000)
     time.sleep(0.5)
     a.screenshot(path=OUT / "09_duels.png")
+    a.get_by_role("tab", name="Чат").click()
+    time.sleep(0.4)
     report["leaderboard"] = a.locator(".lb-row").all_inner_texts()
+    a.screenshot(path=OUT / "09b_chat_board.png")
+    a.get_by_role("tab", name="Соперники").click()
+    time.sleep(0.4)
+    report["rivals"] = a.locator(".lb-row").all_inner_texts()
+    a.screenshot(path=OUT / "09c_rivals.png")
+    a.get_by_role("tab", name="Кости").click()
+    time.sleep(0.4)
+    report["ledger"] = a.locator(".lb-row").all_inner_texts()[:3]
+    a.screenshot(path=OUT / "09d_bones.png")
 
     # 6. forfeit in the rematch
     b.locator(".subnav button", has_text="Сдаться").click()
+    time.sleep(0.2)
     b.locator(".subnav button", has_text="Точно сдаться").click()
     b.wait_for_selector(".result", timeout=8000)
     time.sleep(1)
     report["forfeit_title_b"] = b.locator(".result-title").inner_text()
+    time.sleep(2)
+    report["forfeit_status_b"] = b.locator(".result-v03").inner_text() if b.locator(".result-v03").count() else None
     b.screenshot(path=OUT / "10_forfeit.png")
 
     calls = tg_calls()

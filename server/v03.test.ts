@@ -8,6 +8,7 @@ import {
   createDuel,
   deadlineOf,
   dueReminders,
+  ensureResult,
   DuelError,
   forfeitDuel,
   jobValid,
@@ -83,6 +84,18 @@ describe('FC-05 versioning: v0.2 records stay readable', () => {
     const d = acceptDuel(old as DuelRecord, B, T0, null).duel;
     expect(d.schema).toBe(2);
     expect(deadlineOf(d)).toBe(T0 + TIMING_V03.turnTimeoutMs);
+  });
+});
+
+describe('FC-21 rollback repair', () => {
+  it('a v0.3 duel finished by v0.2 code gets exactly one result on next read', () => {
+    const over = finished(3);
+    const { result: _r, ...noResult } = over;
+    const fixed = ensureResult(noResult as DuelRecord);
+    expect(fixed.result!.reason).toBe(over.result!.reason);
+    expect(fixed.result!.rated).toBe('pending');
+    expect(ensureResult(fixed)).toBe(fixed);
+    expect(ensureResult(over)).toBe(over);
   });
 });
 

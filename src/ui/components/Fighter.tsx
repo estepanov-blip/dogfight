@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { PlayerIndex } from '../../engine';
-import { FIGHTER_LOOK } from '../presentation';
+import { FIGHTER_LOOK, type FighterLook } from '../presentation';
 import type { FloatItem, PoseState } from '../useBattle';
 
 interface Props {
@@ -9,10 +9,12 @@ interface Props {
   shield: number;
   active: boolean;
   floats: FloatItem[];
+  /** v0.3: chosen fighter; default = v0.2 Шиба/Буль by side. */
+  look?: FighterLook;
 }
 
-export function Fighter({ index, pose, shield, active, floats }: Props) {
-  const look = FIGHTER_LOOK[index];
+export function Fighter({ index, pose, shield, active, floats, look: lookProp }: Props) {
+  const look = lookProp ?? FIGHTER_LOOK[index];
   const side = index === 0 ? 'left' : 'right';
   const style = { '--dir': index === 0 ? 1 : -1 } as CSSProperties;
   return (

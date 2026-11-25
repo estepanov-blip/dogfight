@@ -1,5 +1,5 @@
 import { getInitData, isTelegram } from '../platform/telegram';
-import type { CreateDuelResponse, DuelView, MeResponse, RematchResponse, SpinResponse } from './protocol';
+import type { CreateDuelResponse, DuelView, MeResponse, RematchResponse, RivalsResponse, SpinResponse } from './protocol';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -39,6 +39,10 @@ export const api = {
   forfeit: (id: string) => request<DuelView>('POST', `/duels/${id}/forfeit`),
   rematch: (id: string) => request<RematchResponse>('POST', `/duels/${id}/rematch`),
   share: (id: string) => request<{ prepared: string | null }>('POST', `/duels/${id}/share`),
+  // v0.3
+  auto: (id: string, on: boolean) => request<DuelView>('POST', `/duels/${id}/auto`, { on }),
+  setFighter: (fighter: string) => request<{ fighter: string | null }>('POST', '/profile', { fighter }),
+  rivals: () => request<RivalsResponse>('GET', '/rivals'),
 };
 
 /** Duels need Telegram (identity) and the duel server (same origin). */

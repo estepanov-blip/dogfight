@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { GameMode } from '../../engine';
 import { Crown } from '../components/Crown';
 import { RulesSheet } from '../components/RulesSheet';
-import { FIGHTER_LOOK, RING_IMG } from '../presentation';
+import { FIGHTER_LOOK, lookFor, RING_IMG } from '../presentation';
+import { characterById } from '../../online/v03';
 
 interface Props {
   debug: boolean;
@@ -15,9 +16,13 @@ interface Props {
   challengeBusy: boolean;
   onChallenge: () => void;
   onDuels: () => void;
+  /** v0.3 */
+  fighter: string | null;
+  bones: number | null;
+  onFighters: () => void;
 }
 
-export function MenuScreen({ debug, setDebug, onPlay, onLab, online, myTurns, challengeBusy, onChallenge, onDuels }: Props) {
+export function MenuScreen({ debug, setDebug, onPlay, onLab, online, myTurns, challengeBusy, onChallenge, onDuels, fighter, bones, onFighters }: Props) {
   const [rules, setRules] = useState(false);
   return (
     <div className="screen menu">
@@ -38,13 +43,16 @@ export function MenuScreen({ debug, setDebug, onPlay, onLab, online, myTurns, ch
       </div>
 
       <div className="menu-dogs" aria-hidden>
-        <img className="menu-dog left" src={FIGHTER_LOOK[0].sprite} alt="" draggable={false} />
+        <img className="menu-dog left" src={fighter ? lookFor(fighter, 0).sprite : FIGHTER_LOOK[0].sprite} alt="" draggable={false} />
         <img className="menu-dog right flip" src={FIGHTER_LOOK[1].sprite} alt="" draggable={false} />
       </div>
 
       <div className="menu-actions">
         <button className="btn btn-primary btn-play" onClick={() => onPlay('bot')} autoFocus>
           Играть <span className="play-tri">▶</span>
+        </button>
+        <button className="btn btn-ghost btn-fighter" onClick={onFighters}>
+          🐾 Боец: <b>{characterById(fighter)?.name ?? 'Сиба'}</b> · сменить
         </button>
         {online && (
           <div className="menu-row">
@@ -94,7 +102,12 @@ export function MenuScreen({ debug, setDebug, onPlay, onLab, online, myTurns, ch
           )}
         </div>
       </div>
-      <p className="build-tag">Combat Sandbox v0.1 · временный арт</p>
+      {bones !== null && (
+        <div className="bones-chip" aria-label={`Кости: ${bones}`}>
+          🦴 {bones}
+        </div>
+      )}
+      <p className="build-tag">v0.3 · временный арт</p>
       {rules && <RulesSheet onClose={() => setRules(false)} />}
     </div>
   );

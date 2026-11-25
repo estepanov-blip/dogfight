@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { BALANCE, type PlayerIndex } from '../../engine';
 import { api } from '../../online/api';
-import type { DuelView, PlayerInfo } from '../../online/protocol';
+import type { DuelView } from '../../online/protocol';
 import { bindBackButton, shareChallenge } from '../../platform/telegram';
 import { Arena } from '../components/Arena';
+import { Avatar } from '../components/Avatar';
+import { duelNames } from '../presentation';
 import { BattleLog } from '../components/BattleLog';
 import { Hud } from '../components/Hud';
 import { Reels } from '../components/Reels';
@@ -16,33 +18,6 @@ interface Props {
   onOpenDuel: (id: string) => void;
 }
 
-function short(name: string) {
-  const n = name.trim().split(/\s+/)[0] ?? name;
-  return (n.length > 10 ? n.slice(0, 9) + '…' : n).toUpperCase();
-}
-
-export function duelNames(d: DuelView): [string, string] {
-  const label = (i: PlayerIndex) => {
-    const p = d.players[i];
-    if (d.me === i) return 'ТЫ';
-    return p ? short(p.name) : '???';
-  };
-  return [label(0), label(1)];
-}
-
-export function Avatar({ p, corner }: { p: PlayerInfo | null; corner: 'red' | 'blue' }) {
-  const [broken, setBroken] = useState(false);
-  return (
-    <span className={`avatar corner-${corner}`}>
-      {p?.photo && !broken ? (
-        <img src={p.photo} alt="" onError={() => setBroken(true)} referrerPolicy="no-referrer" />
-      ) : (
-        <span>{p ? p.name.slice(0, 1).toUpperCase() : '?'}</span>
-      )}
-    </span>
-  );
-}
-
 async function share(d: DuelView) {
   let prepared: string | null = null;
   try {
@@ -50,7 +25,56 @@ async function share(d: DuelView) {
   } catch {
     /* fallback below */
   }
-  await shareChallenge(prepared, d.link, 'Вызываю тебя на бой! 🥊 Ударь в ответ, пока я не убежал.');
+  await shareChallenge(prepared, d.link, 'Вызываю тебя на бой! 🥊 Посмотрим, кто пропустит.');
+}
+
+function timeLeft(ms: number): string {
+  if (ms <= 0) return '0 мин';
+  const h = Math.floor(ms / 3600_000);
+  const m = Math.floor((ms % 3600_000) / 60_000);
+  return h > 0 ? `${h} ч ${m} мин` : `${m} мин`;
+}
+
+/** v0.3 result block: rated / friendly / pending, bones, personal score. */
+function ResultStatus({ duel }: { duel: DuelView }) {
+  const r = duel.result;
+  if (!r) return null;
+  let status: string;
+  if (r.rated === 'pending') status = 'Результат рассчитывается…';
+  else if (r.rated === 'legacy') status = 'Бой версии 0.2 — без костей и рейтинга';
+  else if (r.rated === 'friendly') status = 'Дружеский бой — без костей и рейтинга (рейтинговых с этим соперником уже 5 за сутки)';
+  else {
+    const d = r.myDelta;
+    status = d ? `Рейтинговый бой · ${d.actual > 0 ? '+' : ''}${d.actual} 🦴${d.actual !== d.nominal ? ` (из ${d.nominal}, баланс не ниже 0)` : ''}` : 'Рейтинговый бой';
+  }
+  const won = r.outcome !== 'draw' && r.outcome === duel.me;
+  const reasonChip =
+    r.reason === 'turn_timeout'
+      ? won
+        ? 'Техническая победа: время хода соперника вышло'
+        : 'Техническое поражение'
+      : r.reason === 'early_surrender'
+        ? won
+          ? 'Соперник сдаётся (технический исход)'
+          : 'Ранняя сдача — техническое поражение'
+        : r.reason === 'surrender' && won
+          ? 'Соперник сдаётся'
+          : null;
+  const h = duel.h2h;
+  return (
+    <div className="result-v03">
+      {reasonChip && <span className={`chip-st ${won ? 'st-win' : 'st-lose'}`}>{reasonChip}</span>}
+      <p className="rv-status">{status}</p>
+      {h && (
+        <p className="rv-h2h">
+          Личный счёт: <b>{h.wins} : {h.losses}</b>
+          {h.draws > 0 && ` · ничьих ${h.draws}`}
+          {h.friendly.wins + h.friendly.losses + h.friendly.draws > 0 &&
+            ` · дружеских ${h.friendly.wins}:${h.friendly.losses}`}
+        </p>
+      )}
+    </div>
+  );
 }
 
 export function DuelScreen({ id, onExit, onOpenDuel }: Props) {
@@ -58,6 +82,11 @@ export function DuelScreen({ id, onExit, onOpenDuel }: Props) {
   const ctl = useDuel(id, speed);
   const { duel, anim, error, busy, animating, showResult, shownTurn } = ctl;
   const [logOpen, setLogOpen] = useState(false);
+  const [clock, setClock] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setClock(Date.now()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
   const [confirmForfeit, setConfirmForfeit] = useState(false);
   const forfeitTimer = useRef(0);
 
@@ -115,7 +144,7 @@ export function DuelScreen({ id, onExit, onOpenDuel }: Props) {
             <Avatar p={challenger} corner="red" />
             <div>
               <h2>{challenger.name} вызывает тебя на бой!</h2>
-              <p className="muted">Ударь в ответ, пока он не убежал 🥊</p>
+              <p className="muted">Принимай вызов — посмотрим, кто пропустит 🥊</p>
             </div>
           </div>
           <img className="challenge-art" src={`${import.meta.env.BASE_URL}share.jpg`} alt="" />
@@ -149,7 +178,11 @@ export function DuelScreen({ id, onExit, onOpenDuel }: Props) {
   else if (busy) label = 'Крутим…';
   else if (!duel.yourTurn) {
     label = `Ход: ${oppName}`;
-    sub = 'Можно закрыть игру — бот напишет, когда твой ход';
+    sub = duel.auto?.opponent ? 'У соперника включён автобой' : 'Можно закрыть игру — бот напишет, когда твой ход';
+  } else if (duel.auto?.me) sub = 'Автобой ударит сам через секунду — можно нажать и вручную';
+  if (playing && duel.deadline && !animating) {
+    const left = timeLeft(duel.deadline - clock);
+    sub = sub ? `${sub} · до тех. поражения ${left}` : `До технического поражения ${left}`;
   }
 
   const firstBanner =
@@ -193,7 +226,8 @@ export function DuelScreen({ id, onExit, onOpenDuel }: Props) {
         )}
       </div>
 
-      <Arena anim={anim} speed={speed} turnSide={turnSide} active={playing || animating} hideCaption={showResult} />
+      {duel.auto?.opponent && playing && <div className="auto-chip">⚙ у соперника автобой</div>}
+      <Arena anim={anim} speed={speed} turnSide={turnSide} active={playing || animating} hideCaption={showResult} fighters={duel.fighters} />
 
       <section className="controls">
         <Reels reel={anim.reel} speed={speed} />
@@ -205,6 +239,18 @@ export function DuelScreen({ id, onExit, onOpenDuel }: Props) {
           <span className={`spin-icon ${animating || busy || (!duel.yourTurn && playing) ? 'rot' : ''}`}>⟳</span> {label}
         </button>
         {sub && <p className="spin-sub">{sub}</p>}
+        {playing && duel.me !== null && (
+          <label className="switch auto-switch">
+            <input
+              type="checkbox"
+              checked={!!duel.auto?.me}
+              disabled={busy}
+              onChange={(e) => void ctl.toggleAuto(e.target.checked)}
+            />
+            <span className="switch-track" />
+            <span>Автобой</span>
+          </label>
+        )}
         {error && (
           <p className="error small" onClick={ctl.clearError}>
             {error}
@@ -235,7 +281,9 @@ export function DuelScreen({ id, onExit, onOpenDuel }: Props) {
           rematchBusy={busy || duel.me === null}
           onMenu={onExit}
           onLog={() => setLogOpen(true)}
-        />
+        >
+          <ResultStatus duel={duel} />
+        </ResultOverlay>
       )}
       {logOpen && <BattleLog log={b.log} names={names} onClose={() => setLogOpen(false)} />}
       <div className="sr-only" aria-live="polite">

@@ -14,6 +14,7 @@ import { isCharacterId, utcWeekStart } from '../src/online/v03';
 import {
   acceptDuel,
   deadlineOf,
+  ensureResult,
   dueReminders,
   DuelError,
   forfeitDuel,
@@ -123,7 +124,8 @@ export class GameStore extends DurableObject<Env> {
   async mutate(op: DuelOp): Promise<DuelOpResult> {
     const d0 = await this.getDuel();
     if (!d0) return { ok: false, code: 'not_found', message: 'Бой не найден', status: 404 };
-    const d = d0.origin ? d0 : { ...d0, origin: op.origin };
+    const repaired = ensureResult(d0);
+    const d = repaired.origin ? repaired : { ...repaired, origin: op.origin };
     try {
       // A request that arrives after the deadline first applies the timeout (one transition).
       if (op.type !== 'accept' && op.type !== 'rematch' && op.type !== 'devShift') {
@@ -184,7 +186,7 @@ export class GameStore extends DurableObject<Env> {
       }
       if (duel !== d0) {
         await this.ctx.storage.put('duel', duel);
-        await this.reschedule(duel, changed);
+        await this.reschedule(duel, changed || repaired !== d0);
       }
       return { ok: true, duel, prevDuel: d0, records, stale, next, changed };
     } catch (e) {
@@ -466,8 +468,20 @@ export class GameStore extends DurableObject<Env> {
 
   async addChatEntry(e: ChatEntry): Promise<void> {
     const c0 = await this.chatState();
+    if (c0.entries[e.duelId]) return;
+    // Rollback case: v0.2 code already counted this duel in the legacy tallies -> move it, never count twice.
+    const seen = (await this.ctx.storage.get<string[]>('counted')) ?? [];
+    if (seen.includes(e.duelId) && e.winner !== 'draw') {
+      const b = { ...c0.legacy };
+      const w = e.winner === 'a' ? e.a : e.b;
+      const l = e.winner === 'a' ? e.b : e.a;
+      if (b[w.id]) b[w.id] = { ...b[w.id], wins: Math.max(0, b[w.id].wins - 1) };
+      if (b[l.id]) b[l.id] = { ...b[l.id], losses: Math.max(0, b[l.id].losses - 1) };
+      await this.ctx.storage.put('board', b);
+      await this.ctx.storage.put('counted', seen.filter((x) => x !== e.duelId));
+    }
     const c = addChatEntry(c0, e);
-    if (c !== c0) await this.ctx.storage.put('entries', c.entries);
+    await this.ctx.storage.put('entries', c.entries);
   }
 
   /** v0.2 behaviour for legacy duels that finish after the update (counted once). */

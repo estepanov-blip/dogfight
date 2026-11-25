@@ -289,6 +289,18 @@ export function forfeitDuel(d: DuelRecord, userId: number, now: number): DuelRec
   return finalize(d, forfeit(d.battle, idx), reason, now);
 }
 
+/**
+ * Rollback repair (FC-21): a v0.3 duel that was finished by older code (e.g. while
+ * rolled back to v0.2) has no result; derive it once from the final battle state.
+ */
+export function ensureResult(d: DuelRecord): DuelRecord {
+  if (!isV03(d) || d.status !== 'over' || !d.battle || d.result) return d;
+  const b = d.battle;
+  const reason: ResultReason =
+    b.endReason === 'forfeit' ? (bothSpun(b) ? 'surrender' : 'early_surrender') : b.endReason === 'timeout' ? 'turn_timeout' : battleReason(b);
+  return finalize({ ...d, status: 'active' }, b, reason, d.updatedAt);
+}
+
 /** Turn timeout (FC-09): the side whose spin expired loses technically. No-op if not yet due. */
 export function timeoutDuel(d: DuelRecord, now: number): DuelRecord {
   const dl = deadlineOf(d);

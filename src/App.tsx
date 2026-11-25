@@ -8,13 +8,16 @@ import { DuelScreen } from './ui/screens/DuelScreen';
 import { DuelsScreen } from './ui/screens/DuelsScreen';
 import { LabScreen } from './ui/screens/LabScreen';
 import { MenuScreen } from './ui/screens/MenuScreen';
+import { FighterScreen } from './ui/screens/FighterScreen';
+import { loadFighter, saveFighter } from './ui/fighterPref';
 
 type Screen =
   | { name: 'menu' }
   | { name: 'battle'; mode: GameMode; id: number }
   | { name: 'lab' }
   | { name: 'duel'; id: string }
-  | { name: 'duels' };
+  | { name: 'duels' }
+  | { name: 'fighters' };
 
 function readDebugFlag(): boolean {
   try {
@@ -43,6 +46,8 @@ export default function App() {
   const [myTurns, setMyTurns] = useState(0);
   const [challengeBusy, setChallengeBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [fighter, setFighter] = useState<string | null>(loadFighter);
+  const [bones, setBones] = useState<number | null>(null);
 
   const setDebug = (v: boolean) => {
     setDebugState(v);
@@ -62,7 +67,14 @@ export default function App() {
     if (!online || screen.name !== 'menu') return;
     api
       .me()
-      .then((r) => setMyTurns(r.duels.filter((d) => d.status === 'active' && d.yourTurn).length))
+      .then((r) => {
+        setMyTurns(r.duels.filter((d) => d.status === 'active' && d.yourTurn).length);
+        if (r.wallet) setBones(r.wallet.balance);
+        if (r.profile?.fighter) {
+          setFighter(r.profile.fighter); // server profile wins over the local cache
+          saveFighter(r.profile.fighter);
+        }
+      })
       .catch(() => {});
   }, [online, screen.name]);
 
@@ -76,9 +88,9 @@ export default function App() {
     if (challengeBusy) return;
     setChallengeBusy(true);
     try {
-      await requestWriteAccess(); // so the bot can say "он принял вызов" / "твой ход"
+      await requestWriteAccess(); // so the bot can say "вызов принят" / "твой ход"
       const { duel, prepared } = await api.create();
-      await shareChallenge(prepared, duel.link, 'Вызываю тебя на бой! 🥊 Ударь в ответ, пока я не убежал.');
+      await shareChallenge(prepared, duel.link, 'Вызываю тебя на бой! 🥊 Посмотрим, кто пропустит.');
       setScreen({ name: 'duel', id: duel.id });
     } catch (e) {
       setToast(e instanceof Error ? e.message : 'Не удалось создать вызов');
@@ -104,15 +116,37 @@ export default function App() {
             challengeBusy={challengeBusy}
             onChallenge={challenge}
             onDuels={() => setScreen({ name: 'duels' })}
+            fighter={fighter}
+            bones={online ? bones : null}
+            onFighters={() => setScreen({ name: 'fighters' })}
           />
         )}
         {screen.name === 'battle' && (
-          <BattleScreen key={screen.id} mode={screen.mode} seed={readSeed()} debug={debug} onExit={toMenu} />
+          <BattleScreen
+            key={screen.id}
+            mode={screen.mode}
+            seed={readSeed()}
+            debug={debug}
+            onExit={toMenu}
+            fighters={[fighter ?? 'shiba', 'bull']}
+          />
         )}
         {screen.name === 'lab' && <LabScreen onBack={toMenu} />}
         {screen.name === 'duel' && <DuelScreen key={screen.id} id={screen.id} onExit={toMenu} onOpenDuel={openDuel} />}
         {screen.name === 'duels' && (
           <DuelsScreen onExit={toMenu} onOpenDuel={openDuel} onChallenge={challenge} challengeBusy={challengeBusy} />
+        )}
+        {screen.name === 'fighters' && (
+          <FighterScreen
+            current={fighter}
+            online={online}
+            onBack={toMenu}
+            onSaved={(id) => {
+              setFighter(id);
+              saveFighter(id);
+              toMenu();
+            }}
+          />
         )}
         {toast && (
           <div className="toast" role="alert">
