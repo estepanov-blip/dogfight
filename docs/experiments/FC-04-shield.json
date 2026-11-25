@@ -1,0 +1,636 @@
+{
+ "sha": "3e389a53e2ec67b3508c466dd3a06abc5e040398",
+ "configHash": "06c9caef56ff298160999bcc531764860297f78005e65e2f2c840c6154ef37ea",
+ "engine": "src/engine @ 3e389a5",
+ "fights": 10000,
+ "seeds": [
+  11,
+  22
+ ],
+ "cells": [
+  {
+   "rule": "v0.2",
+   "startShield": 0,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.6096,
+   "starterCI95": [
+    0.5999979921754026,
+    0.619117832289471
+   ],
+   "starterWinsOfAll": 0.6096,
+   "p1": 0.4976,
+   "p2": 0.5024,
+   "draws": 0,
+   "endReasons": {
+    "ko": 10000,
+    "doubleKo": 0,
+    "spinLimit": 0,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 0,
+   "len": {
+    "mean": 11.6859,
+    "median": 11,
+    "p10": 7,
+    "p90": 17,
+    "min": 2,
+    "max": 39
+   },
+   "spinsPerFighter": 5.84295,
+   "dmgPerSpin": 21.741628800520285,
+   "absorbedShare": 0.15859771205236342,
+   "overhealShare": 0.15458937198067632,
+   "anyTriple": 0.07672494202414876,
+   "winnerHp": 38.325,
+   "comeback": 0.221,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "v0.2",
+   "startShield": 0,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.6065,
+   "starterCI95": [
+    0.5968857424195031,
+    0.6160324629227327
+   ],
+   "starterWinsOfAll": 0.6065,
+   "p1": 0.4981,
+   "p2": 0.5019,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 11.8165,
+    "median": 11,
+    "p10": 7,
+    "p90": 18,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 5.90825,
+   "dmgPerSpin": 21.649811703973256,
+   "absorbedShare": 0.15968337730870713,
+   "overhealShare": 0.15292528586759427,
+   "anyTriple": 0.07540303812465621,
+   "winnerHp": 38.24,
+   "comeback": 0.2247,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "v0.2",
+   "startShield": 10,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.5296,
+   "starterCI95": [
+    0.5198076929756232,
+    0.5393695734856929
+   ],
+   "starterWinsOfAll": 0.5296,
+   "p1": 0.4996,
+   "p2": 0.5004,
+   "draws": 0,
+   "endReasons": {
+    "ko": 10000,
+    "doubleKo": 0,
+    "spinLimit": 0,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 0,
+   "len": {
+    "mean": 12.334,
+    "median": 12,
+    "p10": 7,
+    "p90": 18,
+    "min": 3,
+    "max": 39
+   },
+   "spinsPerFighter": 6.167,
+   "dmgPerSpin": 21.728149829738932,
+   "absorbedShare": 0.19410063620589937,
+   "overhealShare": 0.17382533561839475,
+   "anyTriple": 0.0764958650883736,
+   "winnerHp": 37.52,
+   "comeback": 0.237,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "v0.2",
+   "startShield": 10,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.5302,
+   "starterCI95": [
+    0.5204081666708118,
+    0.5399686389755312
+   ],
+   "starterWinsOfAll": 0.5302,
+   "p1": 0.4974,
+   "p2": 0.5026,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 12.4447,
+    "median": 12,
+    "p10": 7,
+    "p90": 18,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.22235,
+   "dmgPerSpin": 21.65508208313579,
+   "absorbedShare": 0.19487478246026768,
+   "overhealShare": 0.17200505742282163,
+   "anyTriple": 0.07511631457568282,
+   "winnerHp": 37.483,
+   "comeback": 0.245,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "v0.2",
+   "startShield": 15,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.4798,
+   "starterCI95": [
+    0.4700176351344206,
+    0.48959787896968104
+   ],
+   "starterWinsOfAll": 0.4798,
+   "p1": 0.4996,
+   "p2": 0.5004,
+   "draws": 0,
+   "endReasons": {
+    "ko": 10000,
+    "doubleKo": 0,
+    "spinLimit": 0,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 12.6951,
+    "median": 12,
+    "p10": 8,
+    "p90": 18,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.34755,
+   "dmgPerSpin": 21.730785893770037,
+   "absorbedShare": 0.20553186322041364,
+   "overhealShare": 0.1839064506055033,
+   "anyTriple": 0.0763286622397618,
+   "winnerHp": 36.379,
+   "comeback": 0.2772,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "v0.2",
+   "startShield": 15,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.4789,
+   "starterCI95": [
+    0.4691187094798623,
+    0.48869749584669936
+   ],
+   "starterWinsOfAll": 0.4789,
+   "p1": 0.4963,
+   "p2": 0.5037,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 12.8159,
+    "median": 12,
+    "p10": 8,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.40795,
+   "dmgPerSpin": 21.655872783027334,
+   "absorbedShare": 0.20643367880968294,
+   "overhealShare": 0.18221554432454581,
+   "anyTriple": 0.0750552048627096,
+   "winnerHp": 36.219,
+   "comeback": 0.2858,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "v0.2",
+   "startShield": 20,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.4785,
+   "starterCI95": [
+    0.46871919717968974,
+    0.4882973153568541
+   ],
+   "starterWinsOfAll": 0.4785,
+   "p1": 0.4997,
+   "p2": 0.5003,
+   "draws": 0,
+   "endReasons": {
+    "ko": 10000,
+    "doubleKo": 0,
+    "spinLimit": 0,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 12.7091,
+    "median": 12,
+    "p10": 8,
+    "p90": 18,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.35455,
+   "dmgPerSpin": 21.729705486619824,
+   "absorbedShare": 0.21790596201546178,
+   "overhealShare": 0.1986239645072961,
+   "anyTriple": 0.07630752767701883,
+   "winnerHp": 37.576,
+   "comeback": 0.2438,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "v0.2",
+   "startShield": 20,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.4783,
+   "starterCI95": [
+    0.46851944338674056,
+    0.4880972227547944
+   ],
+   "starterWinsOfAll": 0.4783,
+   "p1": 0.4961,
+   "p2": 0.5039,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 12.8269,
+    "median": 12,
+    "p10": 8,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.41345,
+   "dmgPerSpin": 21.655115421497012,
+   "absorbedShare": 0.21871849889116096,
+   "overhealShare": 0.19701080002047397,
+   "anyTriple": 0.07502982014360446,
+   "winnerHp": 37.447,
+   "comeback": 0.2506,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 0,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.6075,
+   "starterCI95": [
+    0.5978896497700497,
+    0.6170277875472305
+   ],
+   "starterWinsOfAll": 0.6075,
+   "p1": 0.4987,
+   "p2": 0.5013,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9998,
+    "doubleKo": 0,
+    "spinLimit": 2,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 2,
+   "len": {
+    "mean": 11.8845,
+    "median": 11,
+    "p10": 7,
+    "p90": 18,
+    "min": 2,
+    "max": 40
+   },
+   "spinsPerFighter": 5.94225,
+   "dmgPerSpin": 21.73886154234507,
+   "absorbedShare": 0.17353607722692183,
+   "overhealShare": 0.15517241379310345,
+   "anyTriple": 0.0766039799739156,
+   "winnerHp": 39.2155,
+   "comeback": 0.2238,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 0,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.6059,
+   "starterCI95": [
+    0.5962834181737847,
+    0.6154352479834243
+   ],
+   "starterWinsOfAll": 0.6059,
+   "p1": 0.4947,
+   "p2": 0.5053,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 12.0358,
+    "median": 11,
+    "p10": 7,
+    "p90": 18,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.0179,
+   "dmgPerSpin": 21.63495571544891,
+   "absorbedShare": 0.17474672995537532,
+   "overhealShare": 0.1532013716276285,
+   "anyTriple": 0.07521726848236096,
+   "winnerHp": 39.142,
+   "comeback": 0.2276,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 10,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.5257,
+   "starterCI95": [
+    0.5159049594224823,
+    0.5354753023361605
+   ],
+   "starterWinsOfAll": 0.5257,
+   "p1": 0.4999,
+   "p2": 0.5001,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9998,
+    "doubleKo": 0,
+    "spinLimit": 2,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 3,
+   "len": {
+    "mean": 12.5697,
+    "median": 12,
+    "p10": 7,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.28485,
+   "dmgPerSpin": 21.72780575510951,
+   "absorbedShare": 0.20985163595887402,
+   "overhealShare": 0.17514282710034698,
+   "anyTriple": 0.07642187164371465,
+   "winnerHp": 38.4785,
+   "comeback": 0.2375,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 10,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.5271,
+   "starterCI95": [
+    0.5173058718258121,
+    0.536873314697893
+   ],
+   "starterWinsOfAll": 0.5271,
+   "p1": 0.4961,
+   "p2": 0.5039,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 12.6993,
+    "median": 12,
+    "p10": 7,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.34965,
+   "dmgPerSpin": 21.641074704904995,
+   "absorbedShare": 0.2105437430524349,
+   "overhealShare": 0.17310800123783654,
+   "anyTriple": 0.07483089619112865,
+   "winnerHp": 38.4175,
+   "comeback": 0.2465,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 15,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.4784,
+   "starterCI95": [
+    0.4686193200867786,
+    0.48819726925226076
+   ],
+   "starterWinsOfAll": 0.4784,
+   "p1": 0.4996,
+   "p2": 0.5004,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9998,
+    "doubleKo": 0,
+    "spinLimit": 2,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 3,
+   "len": {
+    "mean": 12.9525,
+    "median": 12,
+    "p10": 8,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.47625,
+   "dmgPerSpin": 21.727002509168113,
+   "absorbedShare": 0.2215930694089596,
+   "overhealShare": 0.18530796824263443,
+   "anyTriple": 0.07627871067361514,
+   "winnerHp": 37.382,
+   "comeback": 0.2783,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 15,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.479,
+   "starterCI95": [
+    0.46921858853698717,
+    0.48879753998707887
+   ],
+   "starterWinsOfAll": 0.479,
+   "p1": 0.4942,
+   "p2": 0.5058,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 13.08,
+    "median": 12,
+    "p10": 8,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.54,
+   "dmgPerSpin": 21.639755351681956,
+   "absorbedShare": 0.22230151776377152,
+   "overhealShare": 0.18365027906821296,
+   "anyTriple": 0.07481651376146789,
+   "winnerHp": 37.249,
+   "comeback": 0.287,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 20,
+   "seed": 11,
+   "fights": 10000,
+   "starterWinRate": 0.4767,
+   "starterCI95": [
+    0.46692146962535863,
+    0.48649642535610516
+   ],
+   "starterWinsOfAll": 0.4767,
+   "p1": 0.4999,
+   "p2": 0.5001,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9998,
+    "doubleKo": 0,
+    "spinLimit": 2,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 3,
+   "len": {
+    "mean": 12.9676,
+    "median": 12,
+    "p10": 8,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.4838,
+   "dmgPerSpin": 21.72626391930658,
+   "absorbedShare": 0.23419672567549582,
+   "overhealShare": 0.2004313272653172,
+   "anyTriple": 0.07627471544464666,
+   "winnerHp": 38.63,
+   "comeback": 0.2459,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  },
+  {
+   "rule": "hold",
+   "startShield": 20,
+   "seed": 22,
+   "fights": 10000,
+   "starterWinRate": 0.4784,
+   "starterCI95": [
+    0.4686193200867786,
+    0.48819726925226076
+   ],
+   "starterWinsOfAll": 0.4784,
+   "p1": 0.494,
+   "p2": 0.506,
+   "draws": 0,
+   "endReasons": {
+    "ko": 9999,
+    "doubleKo": 0,
+    "spinLimit": 1,
+    "forfeit": 0,
+    "timeout": 0
+   },
+   "fightsAtMaxSpins": 1,
+   "len": {
+    "mean": 13.0914,
+    "median": 12,
+    "p10": 8,
+    "p90": 19,
+    "min": 3,
+    "max": 40
+   },
+   "spinsPerFighter": 6.5457,
+   "dmgPerSpin": 21.639587821012267,
+   "absorbedShare": 0.2347397124879762,
+   "overhealShare": 0.19881781295396483,
+   "anyTriple": 0.07479719510518355,
+   "winnerHp": 38.51,
+   "comeback": 0.2524,
+   "command": "npx tsx scripts/experiments/shield.ts 10000 11 22"
+  }
+ ]
+}
