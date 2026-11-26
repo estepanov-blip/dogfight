@@ -1,4 +1,4 @@
-import { isCharacterId } from '../online/v03';
+import { normalizeFighterId } from '../online/v03';
 
 const KEY = 'dfc.fighter';
 
@@ -6,7 +6,7 @@ const KEY = 'dfc.fighter';
 export function loadFighter(): string | null {
   try {
     const v = window.localStorage.getItem(KEY);
-    return isCharacterId(v) ? v : null;
+    return normalizeFighterId(v); // retired placeholder ids map to their replacement
   } catch {
     return null;
   }

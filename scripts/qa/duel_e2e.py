@@ -70,7 +70,7 @@ with sync_playwright() as p:
     a = page_for(A)
     a.get_by_role("button", name="сменить").click()
     a.wait_for_selector(".fighter-grid", timeout=8000)
-    a.locator(".fighter-card", has_text="Колбаса").click()
+    a.locator(".fighter-card", has_text="Бокс").click()
     a.screenshot(path=OUT / "00_fighters.png")
     a.locator(".btn-challenge").click()
     a.wait_for_selector(".menu", timeout=8000)

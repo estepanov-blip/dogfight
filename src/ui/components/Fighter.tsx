@@ -18,7 +18,7 @@ export function Fighter({ index, pose, shield, active, floats, look: lookProp }:
   const side = index === 0 ? 'left' : 'right';
   const style = { '--dir': index === 0 ? 1 : -1 } as CSSProperties;
   return (
-    <div className={`fighter fighter-${side} corner-${look.corner} ${active ? 'is-active' : ''}`} style={style}>
+    <div className={`fighter fighter-${side} corner-${look.corner} frame-${look.frame} ${active ? 'is-active' : ''}`} style={style}>
       <div className="fighter-spot" aria-hidden />
       <div className={`fighter-pose pose-${pose.pose}`} key={pose.key}>
         <div className="fighter-bob">

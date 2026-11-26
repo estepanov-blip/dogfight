@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "status": "proposed",
+  "schemaVersion": 2,
+  "status": "approved",
   "approved": {
     "decisionId": "DFC-004",
     "count": 8,
@@ -24,6 +24,7 @@
       "breed": "Сиба-ину",
       "assetKey": "shiba",
       "assetStatus": "existing",
+      "frame": "full",
       "priceBones": 0,
       "combatProfile": "shared"
     },
@@ -33,6 +34,37 @@
       "breed": "Бультерьер",
       "assetKey": "bull",
       "assetStatus": "existing",
+      "frame": "full",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "doberman",
+      "name": "Добби",
+      "breed": "Доберман",
+      "assetKey": "doberman",
+      "assetStatus": "final",
+      "frame": "waist",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "shepherd",
+      "name": "Овчар",
+      "breed": "Немецкая овчарка",
+      "assetKey": "shepherd",
+      "assetStatus": "final",
+      "frame": "waist",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "bulldog",
+      "name": "Батон",
+      "breed": "Английский бульдог",
+      "assetKey": "bulldog",
+      "assetStatus": "final",
+      "frame": "waist",
       "priceBones": 0,
       "combatProfile": "shared"
     },
@@ -40,55 +72,57 @@
       "id": "chih",
       "name": "Чих",
       "breed": "Чихуахуа",
-      "assetKey": "chih",
-      "assetStatus": "placeholder",
-      "priceBones": 0,
-      "combatProfile": "shared"
-    },
-    {
-      "id": "puzan",
-      "name": "Пузан",
-      "breed": "Мопс",
-      "assetKey": "puzan",
-      "assetStatus": "placeholder",
-      "priceBones": 0,
-      "combatProfile": "shared"
-    },
-    {
-      "id": "psikh",
-      "name": "Псих",
-      "breed": "Хаски",
-      "assetKey": "psikh",
-      "assetStatus": "placeholder",
-      "priceBones": 0,
-      "combatProfile": "shared"
-    },
-    {
-      "id": "heavy",
-      "name": "Тяжёлый",
-      "breed": "Ротвейлер",
-      "assetKey": "heavy",
-      "assetStatus": "placeholder",
-      "priceBones": 0,
-      "combatProfile": "shared"
-    },
-    {
-      "id": "kolbasa",
-      "name": "Колбаса",
-      "breed": "Такса",
-      "assetKey": "kolbasa",
-      "assetStatus": "placeholder",
+      "assetKey": "chihuahua",
+      "assetStatus": "final",
+      "frame": "waist",
       "priceBones": 0,
       "combatProfile": "shared"
     },
     {
       "id": "pushok",
-      "name": "Пушок",
+      "name": "Пух",
       "breed": "Померанский шпиц",
-      "assetKey": "pushok",
-      "assetStatus": "placeholder",
+      "assetKey": "pomeranian",
+      "assetStatus": "final",
+      "frame": "waist",
+      "priceBones": 0,
+      "combatProfile": "shared"
+    },
+    {
+      "id": "boxer",
+      "name": "Бокс",
+      "breed": "Боксёр",
+      "assetKey": "boxer",
+      "assetStatus": "final",
+      "frame": "waist",
       "priceBones": 0,
       "combatProfile": "shared"
     }
-  ]
+  ],
+  "updated": "2026-11-26",
+  "source": "Fighter Pack v0.3 (Dog_Fight_Club_Fighters_v03.zip, manifest.json)",
+  "assets": {
+    "sprite": "src/assets/game/fighters/<assetKey>.webp (pack: 512×512 PNG -> WebP q90; Сиба/Буль: src/assets/game/<assetKey>.png, unchanged)",
+    "avatar": "src/assets/game/avatars/<assetKey>.webp (256×256; Сиба/Буль cut from their unchanged sprites)",
+    "facing": "right (left corner as is, right corner mirrored by the renderer)",
+    "gloves": "all pack gloves are red; the corner is shown by UI (spot, HUD colour), fur is not recoloured",
+    "animation": "existing programmatic poses idle/punch/hit/block/heal/KO/victory; no per-pose frames"
+  },
+  "manifestIdMap": {
+    "doberman": "doberman",
+    "shepherd": "shepherd",
+    "bulldog": "bulldog",
+    "chihuahua": "chih",
+    "pomeranian": "pushok",
+    "boxer": "boxer"
+  },
+  "retired": {
+    "note": "v0.3 placeholders live 2026-11-25..26; stored ids are shown as and migrated to the replacement",
+    "map": {
+      "puzan": "bulldog",
+      "psikh": "shepherd",
+      "heavy": "doberman",
+      "kolbasa": "boxer"
+    }
+  }
 }

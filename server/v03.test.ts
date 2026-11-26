@@ -39,7 +39,7 @@ import {
   type HistoryEntry,
 } from './settlement';
 import { compose, plan, reminderItems } from './notifications';
-import { CHARACTERS, ECONOMY, TIMING_V03, utcDay, utcWeekStart, winRate } from '../src/online/v03';
+import { CHARACTERS, characterById, ECONOMY, isCharacterId, normalizeFighterId, RETIRED_FIGHTERS, TIMING_V03, utcDay, utcWeekStart, winRate } from '../src/online/v03';
 import { BALANCE, createBattle, takeTurn } from '../src/engine';
 
 const A = { id: 111, name: 'Аня' };
@@ -415,7 +415,8 @@ describe('FC-17/18 fighters (DFC-004)', () => {
     const proposal = JSON.parse(readFileSync(new URL('../docs/proposals/characters.json', import.meta.url), 'utf8'));
     expect(CHARACTERS).toHaveLength(8);
     expect(CHARACTERS.every((c) => c.priceBones === 0 && c.combatProfile === 'shared')).toBe(true);
-    expect(CHARACTERS.map((c) => c.id)).toEqual(proposal.characters.map((c: { id: string }) => c.id));
+    expect(CHARACTERS).toEqual(proposal.characters);
+    expect(RETIRED_FIGHTERS).toEqual(proposal.retired.map);
     const econ = JSON.parse(readFileSync(new URL('../docs/proposals/economy.json', import.meta.url), 'utf8'));
     expect(econ.approved.startingBalance).toBe(ECONOMY.startingBalance);
     expect(econ.approved.winDelta).toBe(ECONOMY.winDelta);
@@ -423,14 +424,28 @@ describe('FC-17/18 fighters (DFC-004)', () => {
     expect(econ.approved.ratedMatchesPerOpponentPerDay).toBe(ECONOMY.ratedPerOpponentPerDay);
   });
   it('snapshot at acceptance; mirror match allowed; no choice -> v0.2 roles', () => {
-    expect(started(2, T0, ['psikh', 'psikh']).fighters).toEqual(['psikh', 'psikh']);
-    expect(started(2, T0, [null, 'heavy']).fighters).toEqual(['shiba', 'heavy']);
+    expect(started(2, T0, ['boxer', 'boxer']).fighters).toEqual(['boxer', 'boxer']);
+    expect(started(2, T0, [null, 'doberman']).fighters).toEqual(['shiba', 'doberman']);
     const d = started(2, T0, ['chih', 'pushok']);
     expect(rematchDuel(finished(2), A.id, 'r', 1, T0, [null, null]).next!.fighters).toEqual(['shiba', 'bull']);
     expect(d.fighters).toEqual(['chih', 'pushok']);
   });
+  it('Fighter Pack v0.3: Сиба/Буль unchanged, six pack fighters, retired ids migrate', () => {
+    expect(CHARACTERS.map((c) => c.id)).toEqual(['shiba', 'bull', 'doberman', 'shepherd', 'bulldog', 'chih', 'pushok', 'boxer']);
+    expect(CHARACTERS.map((c) => c.name)).toEqual(['Сиба', 'Буль', 'Добби', 'Овчар', 'Батон', 'Чих', 'Пух', 'Бокс']);
+    expect(CHARACTERS.slice(0, 2).every((c) => c.frame === 'full' && c.assetStatus === 'existing')).toBe(true);
+    expect(CHARACTERS.slice(2).every((c) => c.frame === 'waist' && c.assetStatus === 'final')).toBe(true);
+    for (const [old, now] of Object.entries(RETIRED_FIGHTERS)) {
+      expect(isCharacterId(old)).toBe(false); // cannot be chosen any more
+      expect(normalizeFighterId(old)).toBe(now);
+      expect(characterById(old)!.id).toBe(now);
+    }
+    expect(normalizeFighterId('shiba')).toBe('shiba');
+    expect(normalizeFighterId('nope')).toBeNull();
+    expect(normalizeFighterId(null)).toBeNull();
+  });
   it('fighter choice never changes combat: same seed -> same fight', () => {
-    const x = playOut(started(42, T0, ['chih', 'heavy']));
+    const x = playOut(started(42, T0, ['chih', 'shepherd']));
     const y = playOut(started(42, T0, [null, null]));
     expect(x.battle!.log.map((r) => r.combo.symbols.join())).toEqual(y.battle!.log.map((r) => r.combo.symbols.join()));
   });
