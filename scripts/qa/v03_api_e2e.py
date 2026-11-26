@@ -71,15 +71,18 @@ A, B = user(9001, "Аня"), user(9002, "Боря")
 check("QA-08", "first wallet access grants 500 once", bones(A) == 500 and bones(A) == 500)
 
 # ------------------------------------------------------------------ QA-11 fighter snapshot
-call(A, "POST", "/api/profile", {"fighter": "psikh"})
-call(B, "POST", "/api/profile", {"fighter": "psikh"})
+call(A, "POST", "/api/profile", {"fighter": "pushok"})
+call(B, "POST", "/api/profile", {"fighter": "pushok"})
 bad = call(A, "POST", "/api/profile", {"fighter": "dragon"})
 check("QA-11", "unknown fighter id is rejected", bad.get("status") == 400)
+retired = call(A, "POST", "/api/profile", {"fighter": "psikh"})
+check("QA-11", "retired placeholder id cannot be chosen (Fighter Pack v0.3)", retired.get("status") == 400)
+check("QA-11", "choice is stored in the profile", call(A, "GET", "/api/me").get("profile", {}).get("fighter") == "pushok")
 v = new_duel(A, B)
-check("QA-11", "mirror match snapshot at acceptance", v["fighters"] == ["psikh", "psikh"], str(v["fighters"]))
-call(A, "POST", "/api/profile", {"fighter": "heavy"})
+check("QA-11", "mirror match snapshot at acceptance", v["fighters"] == ["pushok", "pushok"], str(v["fighters"]))
+call(A, "POST", "/api/profile", {"fighter": "doberman"})
 v2 = call(A, "GET", f"/api/duels/{v['id']}")
-check("QA-11", "profile change does not alter an active duel", v2["fighters"] == ["psikh", "psikh"])
+check("QA-11", "profile change does not alter an active duel", v2["fighters"] == ["pushok", "pushok"])
 check("QA-06", "v0.3 duel has a 24 h deadline", abs((v2["deadline"] - v2["updatedAt"]) - 24 * 3600_000) < 5000 or v2["deadline"] is not None)
 
 # ------------------------------------------------------------------ QA-04 auto toggles

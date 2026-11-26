@@ -10,7 +10,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { other, type TurnRecord } from '../src/engine';
 import type { DuelSummary, HeadToHead, LeaderRow, LedgerEntry, PlayerInfo, RivalRow } from '../src/online/protocol';
-import { isCharacterId, utcWeekStart } from '../src/online/v03';
+import { isCharacterId, normalizeFighterId, utcWeekStart } from '../src/online/v03';
 import {
   acceptDuel,
   deadlineOf,
@@ -438,8 +438,17 @@ export class GameStore extends DurableObject<Env> {
     return headToHead(await this.historyState(), opponentId);
   }
 
+  /** Saved fighter; a retired placeholder id (Fighter Pack v0.3) is migrated to its replacement on read. */
   async profile(): Promise<{ fighter: string | null }> {
-    return (await this.ctx.storage.get<{ fighter: string | null }>('profile')) ?? { fighter: null };
+    const p = await this.ctx.storage.get<{ fighter: string | null }>('profile');
+    if (!p) return { fighter: null };
+    const fighter = normalizeFighterId(p.fighter);
+    if (fighter !== p.fighter) {
+      const migrated = { fighter };
+      await this.ctx.storage.put('profile', migrated);
+      return migrated;
+    }
+    return p;
   }
 
   async setProfile(fighter: string): Promise<{ fighter: string | null }> {

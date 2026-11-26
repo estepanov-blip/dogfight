@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { GameMode } from '../../engine';
 import { Crown } from '../components/Crown';
 import { RulesSheet } from '../components/RulesSheet';
-import { FIGHTER_LOOK, lookFor, RING_IMG } from '../presentation';
+import { avatarFor, FIGHTER_LOOK, lookFor, RING_IMG } from '../presentation';
 import { characterById } from '../../online/v03';
 
 interface Props {
@@ -43,7 +43,12 @@ export function MenuScreen({ debug, setDebug, onPlay, onLab, online, myTurns, ch
       </div>
 
       <div className="menu-dogs" aria-hidden>
-        <img className="menu-dog left" src={fighter ? lookFor(fighter, 0).sprite : FIGHTER_LOOK[0].sprite} alt="" draggable={false} />
+        <img
+          className={`menu-dog left frame-${fighter ? lookFor(fighter, 0).frame : 'full'}`}
+          src={fighter ? lookFor(fighter, 0).sprite : FIGHTER_LOOK[0].sprite}
+          alt=""
+          draggable={false}
+        />
         <img className="menu-dog right flip" src={FIGHTER_LOOK[1].sprite} alt="" draggable={false} />
       </div>
 
@@ -52,7 +57,8 @@ export function MenuScreen({ debug, setDebug, onPlay, onLab, online, myTurns, ch
           Играть <span className="play-tri">▶</span>
         </button>
         <button className="btn btn-ghost btn-fighter" onClick={onFighters}>
-          🐾 Боец: <b>{characterById(fighter)?.name ?? 'Сиба'}</b> · сменить
+          <img className="btn-fighter-ava" src={avatarFor(fighter)} alt="" draggable={false} />
+          Боец: <b>{characterById(fighter)?.name ?? 'Сиба'}</b> · сменить
         </button>
         {online && (
           <div className="menu-row">

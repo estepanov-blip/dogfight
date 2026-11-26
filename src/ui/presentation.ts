@@ -12,12 +12,20 @@ import healImg from '../assets/game/sym_heal.png';
 import extraImg from '../assets/game/sym_extra.png';
 import missImg from '../assets/game/sym_miss.png';
 import ringImg from '../assets/game/ring.jpg';
-import chihImg from '../assets/game/fighters/chih.png';
-import puzanImg from '../assets/game/fighters/puzan.png';
-import psikhImg from '../assets/game/fighters/psikh.png';
-import heavyImg from '../assets/game/fighters/heavy.png';
-import kolbasaImg from '../assets/game/fighters/kolbasa.png';
-import pushokImg from '../assets/game/fighters/pushok.png';
+import dobermanImg from '../assets/game/fighters/doberman.webp';
+import shepherdImg from '../assets/game/fighters/shepherd.webp';
+import bulldogImg from '../assets/game/fighters/bulldog.webp';
+import chihuahuaImg from '../assets/game/fighters/chihuahua.webp';
+import pomeranianImg from '../assets/game/fighters/pomeranian.webp';
+import boxerImg from '../assets/game/fighters/boxer.webp';
+import shibaAva from '../assets/game/avatars/shiba.webp';
+import bullAva from '../assets/game/avatars/bull.webp';
+import dobermanAva from '../assets/game/avatars/doberman.webp';
+import shepherdAva from '../assets/game/avatars/shepherd.webp';
+import bulldogAva from '../assets/game/avatars/bulldog.webp';
+import chihuahuaAva from '../assets/game/avatars/chihuahua.webp';
+import pomeranianAva from '../assets/game/avatars/pomeranian.webp';
+import boxerAva from '../assets/game/avatars/boxer.webp';
 import { CHARACTERS, characterById } from '../online/v03';
 import type { DuelView } from '../online/protocol';
 
@@ -47,24 +55,44 @@ export interface FighterLook {
   flip: boolean;
   corner: 'red' | 'blue';
   breed: string;
+  /** Sprite framing: full body (v0.2 art) or waist-up (Fighter Pack v0.3). */
+  frame: 'full' | 'waist';
 }
 
 export const FIGHTER_LOOK: [FighterLook, FighterLook] = [
-  { sprite: shibaImg, flip: false, corner: 'red', breed: 'Сиба' },
-  { sprite: bullImg, flip: true, corner: 'blue', breed: 'Буль' },
+  { sprite: shibaImg, flip: false, corner: 'red', breed: 'Сиба', frame: 'full' },
+  { sprite: bullImg, flip: true, corner: 'blue', breed: 'Буль', frame: 'full' },
 ];
 
-/** Asset map: character id -> sprite (FC-18). Unknown ids fall back to Шиба/Буль by side. */
+/** Asset map: assetKey -> idle sprite (all sources face right). Unknown ids fall back to Сиба/Буль by side. */
 export const FIGHTER_SPRITES: Record<string, string> = {
   shiba: shibaImg,
   bull: bullImg,
-  chih: chihImg,
-  puzan: puzanImg,
-  psikh: psikhImg,
-  heavy: heavyImg,
-  kolbasa: kolbasaImg,
-  pushok: pushokImg,
+  doberman: dobermanImg,
+  shepherd: shepherdImg,
+  bulldog: bulldogImg,
+  chihuahua: chihuahuaImg,
+  pomeranian: pomeranianImg,
+  boxer: boxerImg,
 };
+
+/** Asset map: assetKey -> 256×256 avatar (picker, menu). */
+export const FIGHTER_AVATARS: Record<string, string> = {
+  shiba: shibaAva,
+  bull: bullAva,
+  doberman: dobermanAva,
+  shepherd: shepherdAva,
+  bulldog: bulldogAva,
+  chihuahua: chihuahuaAva,
+  pomeranian: pomeranianAva,
+  boxer: boxerAva,
+};
+
+/** Avatar of a character (retired ids resolve to their replacement); Сиба when unknown. */
+export function avatarFor(id: string | null | undefined): string {
+  const c = characterById(id);
+  return (c && FIGHTER_AVATARS[c.assetKey]) || shibaAva;
+}
 
 /** Look of a character on a side: left faces right, right is mirrored; corner colour by side. */
 export function lookFor(id: string | null | undefined, side: 0 | 1): FighterLook {
@@ -75,6 +103,7 @@ export function lookFor(id: string | null | undefined, side: 0 | 1): FighterLook
     flip: side === 1,
     corner: side === 0 ? 'red' : 'blue',
     breed: c?.name ?? fallback.breed,
+    frame: c?.frame ?? fallback.frame,
   };
 }
 

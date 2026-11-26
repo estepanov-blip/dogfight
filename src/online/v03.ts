@@ -39,33 +39,60 @@ export interface CharacterDef {
   id: string;
   name: string;
   breed: string;
+  /** Sprite/avatar file key: src/assets/game/fighters/<assetKey>.webp, avatars/<assetKey>.webp. */
   assetKey: string;
-  assetStatus: 'existing' | 'placeholder';
+  assetStatus: 'existing' | 'final' | 'placeholder';
+  /** Sprite framing: full body (v0.2 art) or waist-up (Fighter Pack v0.3, cut at the shorts). */
+  frame: 'full' | 'waist';
   priceBones: 0;
   combatProfile: 'shared';
 }
 
-/** APPROVED DFC-004: eight free fighters, identical combat stats. */
+/**
+ * APPROVED DFC-004 + Fighter Pack v0.3 (2026-11-26): eight free fighters, identical combat stats.
+ * Сиба and Буль are unchanged. Чих and Пух keep their v0.3 ids (`chih`, `pushok`) with the
+ * new pack art (manifest ids chihuahua / pomeranian). Order = order in the picker.
+ */
 export const CHARACTERS: readonly CharacterDef[] = [
-  { id: 'shiba', name: 'Сиба', breed: 'Сиба-ину', assetKey: 'shiba', assetStatus: 'existing', priceBones: 0, combatProfile: 'shared' },
-  { id: 'bull', name: 'Буль', breed: 'Бультерьер', assetKey: 'bull', assetStatus: 'existing', priceBones: 0, combatProfile: 'shared' },
-  { id: 'chih', name: 'Чих', breed: 'Чихуахуа', assetKey: 'chih', assetStatus: 'placeholder', priceBones: 0, combatProfile: 'shared' },
-  { id: 'puzan', name: 'Пузан', breed: 'Мопс', assetKey: 'puzan', assetStatus: 'placeholder', priceBones: 0, combatProfile: 'shared' },
-  { id: 'psikh', name: 'Псих', breed: 'Хаски', assetKey: 'psikh', assetStatus: 'placeholder', priceBones: 0, combatProfile: 'shared' },
-  { id: 'heavy', name: 'Тяжёлый', breed: 'Ротвейлер', assetKey: 'heavy', assetStatus: 'placeholder', priceBones: 0, combatProfile: 'shared' },
-  { id: 'kolbasa', name: 'Колбаса', breed: 'Такса', assetKey: 'kolbasa', assetStatus: 'placeholder', priceBones: 0, combatProfile: 'shared' },
-  { id: 'pushok', name: 'Пушок', breed: 'Померанский шпиц', assetKey: 'pushok', assetStatus: 'placeholder', priceBones: 0, combatProfile: 'shared' },
+  { id: 'shiba', name: 'Сиба', breed: 'Сиба-ину', assetKey: 'shiba', assetStatus: 'existing', frame: 'full', priceBones: 0, combatProfile: 'shared' },
+  { id: 'bull', name: 'Буль', breed: 'Бультерьер', assetKey: 'bull', assetStatus: 'existing', frame: 'full', priceBones: 0, combatProfile: 'shared' },
+  { id: 'doberman', name: 'Добби', breed: 'Доберман', assetKey: 'doberman', assetStatus: 'final', frame: 'waist', priceBones: 0, combatProfile: 'shared' },
+  { id: 'shepherd', name: 'Овчар', breed: 'Немецкая овчарка', assetKey: 'shepherd', assetStatus: 'final', frame: 'waist', priceBones: 0, combatProfile: 'shared' },
+  { id: 'bulldog', name: 'Батон', breed: 'Английский бульдог', assetKey: 'bulldog', assetStatus: 'final', frame: 'waist', priceBones: 0, combatProfile: 'shared' },
+  { id: 'chih', name: 'Чих', breed: 'Чихуахуа', assetKey: 'chihuahua', assetStatus: 'final', frame: 'waist', priceBones: 0, combatProfile: 'shared' },
+  { id: 'pushok', name: 'Пух', breed: 'Померанский шпиц', assetKey: 'pomeranian', assetStatus: 'final', frame: 'waist', priceBones: 0, combatProfile: 'shared' },
+  { id: 'boxer', name: 'Бокс', breed: 'Боксёр', assetKey: 'boxer', assetStatus: 'final', frame: 'waist', priceBones: 0, combatProfile: 'shared' },
 ];
+
+/**
+ * Placeholder fighters from v0.3 (live 2026-11-25..26) that the pack replaced. Saved profiles and
+ * duel snapshots may still hold these ids: they are shown as (and re-saved as) the mapped fighter.
+ */
+export const RETIRED_FIGHTERS: Readonly<Record<string, string>> = {
+  puzan: 'bulldog', // Пузан (мопс) -> Батон
+  psikh: 'shepherd', // Псих (хаски) -> Овчар
+  heavy: 'doberman', // Тяжёлый (ротвейлер) -> Добби
+  kolbasa: 'boxer', // Колбаса (такса) -> Бокс
+};
 
 /** v0.2 roles: challenger was Шиба, accepter was Буль. */
 export const LEGACY_ROLE_FIGHTERS: readonly [string, string] = ['shiba', 'bull'];
 
+/** Selectable now (strict: retired ids are not accepted for new choices). */
 export function isCharacterId(id: unknown): id is string {
   return typeof id === 'string' && CHARACTERS.some((c) => c.id === id);
 }
 
+/** Current id for a stored id: retired ids map to their replacement; unknown -> null. */
+export function normalizeFighterId(id: unknown): string | null {
+  if (typeof id !== 'string') return null;
+  if (isCharacterId(id)) return id;
+  return RETIRED_FIGHTERS[id] ?? null;
+}
+
 export function characterById(id: string | null | undefined): CharacterDef | null {
-  return CHARACTERS.find((c) => c.id === id) ?? null;
+  const n = normalizeFighterId(id);
+  return CHARACTERS.find((c) => c.id === n) ?? null;
 }
 
 // ---------------------------------------------------------------- UTC calendar

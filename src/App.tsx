@@ -10,6 +10,7 @@ import { LabScreen } from './ui/screens/LabScreen';
 import { MenuScreen } from './ui/screens/MenuScreen';
 import { FighterScreen } from './ui/screens/FighterScreen';
 import { loadFighter, saveFighter } from './ui/fighterPref';
+import { normalizeFighterId } from './online/v03';
 
 type Screen =
   | { name: 'menu' }
@@ -26,6 +27,15 @@ function readDebugFlag(): boolean {
     return window.localStorage.getItem('dfc.debug') === '1';
   } catch {
     return false;
+  }
+}
+
+/** QA/debug: `?p2=<fighter id>` dresses the right corner of a local battle (cosmetic only). */
+function readP2(): string {
+  try {
+    return normalizeFighterId(new URLSearchParams(window.location.search).get('p2')) ?? 'bull';
+  } catch {
+    return 'bull';
   }
 }
 
@@ -128,7 +138,7 @@ export default function App() {
             seed={readSeed()}
             debug={debug}
             onExit={toMenu}
-            fighters={[fighter ?? 'shiba', 'bull']}
+            fighters={[fighter ?? 'shiba', readP2()]}
           />
         )}
         {screen.name === 'lab' && <LabScreen onBack={toMenu} />}

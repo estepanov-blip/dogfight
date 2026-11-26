@@ -1,7 +1,9 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BALANCE, createBattle, takeTurn, type SymbolId } from '../../engine';
-import { captionFor, floatsFor, posesFor } from '../presentation';
+import { avatarFor, captionFor, FIGHTER_AVATARS, FIGHTER_SPRITES, floatsFor, lookFor, posesFor } from '../presentation';
+import { CHARACTERS, RETIRED_FIGHTERS } from '../../online/v03';
+import { FighterScreen } from '../screens/FighterScreen';
 import { BattleScreen } from '../screens/BattleScreen';
 
 afterEach(() => {
@@ -31,6 +33,44 @@ describe('presentation mapping', () => {
     expect(posesFor(rec(['miss', 'miss', 'miss'])).actor).toBe('self');
     const f = floatsFor(rec(['punch', 'heal', 'block'], [50, 100]));
     expect(f.map((x) => x.kind).sort()).toEqual(['dmg', 'heal', 'shield']);
+  });
+});
+
+describe('Fighter Pack v0.3', () => {
+  it('every fighter has its own sprite and avatar; both corners; right corner mirrored', () => {
+    const sprites = new Set<string>();
+    const avatars = new Set<string>();
+    for (const c of CHARACTERS) {
+      expect(FIGHTER_SPRITES[c.assetKey]).toBeTruthy();
+      expect(FIGHTER_AVATARS[c.assetKey]).toBeTruthy();
+      const l = lookFor(c.id, 0);
+      const r = lookFor(c.id, 1);
+      expect(l.sprite).toBe(FIGHTER_SPRITES[c.assetKey]);
+      expect(r.sprite).toBe(l.sprite); // mirror match: same art on both sides
+      expect([l.flip, r.flip]).toEqual([false, true]);
+      expect([l.corner, r.corner]).toEqual(['red', 'blue']);
+      expect(l.frame).toBe(c.frame);
+      expect(l.breed).toBe(c.name);
+      sprites.add(l.sprite);
+      avatars.add(avatarFor(c.id));
+    }
+    expect(sprites.size).toBe(8);
+    expect(avatars.size).toBe(8);
+  });
+  it('retired placeholder ids render as their replacement; unknown ids keep the v0.2 look', () => {
+    for (const [old, now] of Object.entries(RETIRED_FIGHTERS)) expect(lookFor(old, 1)).toEqual(lookFor(now, 1));
+    expect(lookFor('nope', 0).breed).toBe('Сиба');
+    expect(lookFor(undefined, 1).breed).toBe('Буль');
+  });
+  it('picker lists all eight, maps a retired current id, saves the selection', () => {
+    const onSaved = vi.fn();
+    render(<FighterScreen current="kolbasa" online={false} onSaved={onSaved} onBack={() => {}} />);
+    const radios = screen.getAllByRole('radio');
+    expect(radios).toHaveLength(8);
+    expect(screen.getByRole('radio', { name: /Бокс/ }).getAttribute('aria-checked')).toBe('true');
+    fireEvent.click(screen.getByRole('radio', { name: /Пух/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Выбрать: Пух' }));
+    return vi.waitFor(() => expect(onSaved).toHaveBeenCalledWith('pushok'));
   });
 });
 

@@ -324,6 +324,13 @@ img {
   margin-right: -7%;
   animation: menu-bob 2.4s ease-in-out infinite;
 }
+.menu-dog.left.frame-waist {
+  /* waist-up pack sprite: bigger close-up, cut line tucked behind the Play button */
+  max-width: 66%;
+  height: min(100%, 40dvh);
+  margin-right: -14%;
+  margin-bottom: -10%;
+}
 .menu-dog.right {
   margin-left: -7%;
   animation: menu-bob 2.4s ease-in-out -1.2s infinite;
@@ -670,6 +677,22 @@ img {
   /* rendered sprite height: contained by box height or width (sprite aspect ≈ 0.78) */
   --img-h: min(86cqh, 70cqw);
 }
+/* Fighter Pack v0.3: waist-up square sprites (cut at the shorts). Drawn as a larger
+   close-up; the cut line sits at the ring edge, under the reels panel that overlaps it.
+   Outer offset keeps the back glove on screen; facing gloves overlap in the centre. */
+.fighter.frame-waist {
+  bottom: -1%;
+  width: 64%;
+  height: 58%;
+  /* torso (head..waistband) ≈ the full-body pair's torso; heads of a mirror pair do not overlap */
+  --img-h: min(58cqh, 64cqw);
+}
+.fighter-left.frame-waist {
+  left: -4%;
+}
+.fighter-right.frame-waist {
+  right: -4%;
+}
 .fighter-left {
   left: -3%;
 }
@@ -871,6 +894,23 @@ img {
   65% { transform: translateX(calc(var(--dir) * 26%)) translateY(calc(var(--img-h) * 0.14)) rotate(calc(var(--dir) * -86deg)); }
   80% { transform: translateX(calc(var(--dir) * 26%)) translateY(calc(var(--img-h) * 0.1)) rotate(calc(var(--dir) * -80deg)); }
   100% { transform: translateX(calc(var(--dir) * 26%)) translateY(calc(var(--img-h) * 0.13)) rotate(calc(var(--dir) * -84deg)); }
+}
+/* waist-up sprites: a 84° fall would show the cut at the shorts, so they topple back
+   and sink below the ring edge instead (the reels panel covers the cut line) */
+.frame-waist .pose-ko {
+  transform-origin: 50% 100%;
+  animation-name: ko-waist;
+}
+@keyframes ko-waist {
+  0% { transform: none; }
+  18% { transform: translateX(calc(var(--dir) * -6%)) rotate(calc(var(--dir) * -14deg)); }
+  65% { transform: translateX(calc(var(--dir) * 12%)) translateY(40%) rotate(calc(var(--dir) * -40deg)); }
+  80% { transform: translateX(calc(var(--dir) * 12%)) translateY(34%) rotate(calc(var(--dir) * -36deg)); }
+  100% { transform: translateX(calc(var(--dir) * 12%)) translateY(37%) rotate(calc(var(--dir) * -38deg)); }
+}
+.frame-waist .ko-stars {
+  bottom: calc(var(--img-h) * 0.55);
+  left: calc(50% + var(--dir) * -20%);
 }
 .ko-stars {
   position: absolute;
@@ -2128,35 +2168,96 @@ img {
   padding: calc(10px + env(safe-area-inset-top)) 14px 24px;
   gap: 10px;
 }
+.fighter-stage {
+  position: relative;
+  height: min(38vh, 300px);
+  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 100%, rgba(255, 204, 41, 0.22), transparent 70%),
+    linear-gradient(#2a2233, #18131d);
+}
+.fighter-stage-img {
+  position: absolute;
+  left: 58%;
+  bottom: 0;
+  height: 96%;
+  transform: translateX(-50%);
+  object-fit: contain;
+  object-position: 50% 100%;
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.6));
+  animation: stage-in 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.fighter-stage.frame-waist .fighter-stage-img {
+  height: 112%;
+  bottom: -14%;
+}
+@keyframes stage-in {
+  from { transform: translateX(-50%) scale(0.9); opacity: 0; }
+}
+.fighter-stage-name {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+.fighter-stage-name b {
+  font-size: 22px;
+  font-weight: 900;
+}
+.fighter-stage-name small {
+  color: var(--muted);
+}
 .fighter-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 .fighter-card {
   border: 0;
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--panel);
-  padding: 10px 8px;
+  padding: 6px 4px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
   cursor: pointer;
+  color: inherit;
+  font: inherit;
   box-shadow: inset 0 0 0 2px transparent;
+  min-width: 0;
 }
 .fighter-card img {
-  height: 120px;
   width: 100%;
-  object-fit: contain;
-  object-position: 50% 100%;
+  aspect-ratio: 1;
+  max-width: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #2a2233;
 }
-.fighter-card small {
-  color: var(--muted);
+.fighter-card b {
+  font-size: 13px;
 }
 .fighter-card.selected {
   box-shadow: inset 0 0 0 3px var(--yellow);
   background: linear-gradient(rgba(255, 204, 41, 0.15), var(--panel));
+}
+.fighter-note {
+  margin: 0;
+}
+.btn-fighter-ava {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 6px;
+  background: #2a2233;
 }
 .fc-tags {
   display: flex;
